@@ -37,7 +37,7 @@ struct Quote: Identifiable, Codable {
         colorStyle: PastelStyle = .mint,
         timesResurfaced: Int = 0,
         lastResurfacedAt: Date? = nil,
-        fontStyle: FontStyle = .rounded    // Rounded is the Quotie default
+        fontStyle: FontStyle = .rounded
     ) {
         self.id = id
         self.text = text
