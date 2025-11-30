@@ -1,0 +1,134 @@
+import Foundation
+import Combine
+import WidgetKit   // <- needed for WidgetCenter
+
+class QuoteStore: ObservableObject {
+    @Published var quotes: [Quote] {
+        didSet {
+            saveQuotes()   // <- now matches the function name below
+        }
+    }
+
+    init() {
+        self.quotes = Self.loadQuotes()
+    }
+
+    // MARK: - Public API
+
+    func addQuote(
+        text: String,
+        author: String,
+        source: String,
+        colorStyle: PastelStyle,
+        fontStyle: FontStyle
+    ) {
+        let newQuote = Quote(
+            text: text,
+            author: author,
+            source: source,
+            isFavorite: false,
+            colorStyle: colorStyle,
+            fontStyle: fontStyle
+        )
+        quotes.append(newQuote)
+    }
+
+    func toggleFavorite(_ quote: Quote) {
+        if let index = quotes.firstIndex(where: { $0.id == quote.id }) {
+            quotes[index].isFavorite.toggle()
+        }
+    }
+
+    func delete(_ quote: Quote) {
+        quotes.removeAll { $0.id == quote.id }
+    }
+
+    func resurfaceQuote() -> Quote? {
+        let favorites = quotes.filter { $0.isFavorite }
+        let pool = favorites.isEmpty ? quotes : favorites
+
+        guard !pool.isEmpty else { return nil }
+
+        let chosen = pool.randomElement()!
+
+        if let index = quotes.firstIndex(where: { $0.id == chosen.id }) {
+            quotes[index].timesResurfaced += 1
+            quotes[index].lastResurfacedAt = Date()
+            return quotes[index]
+        } else {
+            return chosen
+        }
+    }
+
+    func update(_ updated: Quote) {
+        if let index = quotes.firstIndex(where: { $0.id == updated.id }) {
+            quotes[index] = updated
+        }
+    }
+
+    // MARK: - Persistence
+
+    /// Shared location for app + widget
+    private static func sharedFileURL() -> URL? {
+        guard let containerURL = FileManager.default
+            .containerURL(forSecurityApplicationGroupIdentifier: sharedAppGroupID)
+        else {
+            return nil
+        }
+        return containerURL.appendingPathComponent(sharedQuotesFilename)
+    }
+
+    private static func loadQuotes() -> [Quote] {
+        guard let url = sharedFileURL(),
+              let data = try? Data(contentsOf: url)
+        else {
+            return sampleQuotes
+        }
+
+        let decoder = JSONDecoder()
+        return (try? decoder.decode([Quote].self, from: data)) ?? sampleQuotes
+    }
+
+    private func saveQuotes() {
+        guard let url = Self.sharedFileURL() else { return }
+        do {
+            let data = try JSONEncoder().encode(quotes)
+            try data.write(to: url, options: .atomic)
+            // Tell widgets “hey, data changed”
+            WidgetCenter.shared.reloadAllTimelines()
+        } catch {
+            print("Failed to save quotes for widget: \(error)")
+        }
+    }
+}
+extension QuoteStore {
+
+    /// Deterministic "random" quote for a given day.
+    func quoteFor(date: Date = Date()) -> Quote? {
+        guard !quotes.isEmpty else { return nil }
+
+        // Day-of-year → stable index for that day
+        let dayOfYear = Calendar.current.ordinality(of: .day, in: .year, for: date) ?? 0
+        let index = dayOfYear % quotes.count
+        return quotes[index]
+    }
+
+    /// Push today's quote to the widget
+    func updateWidgetQuoteOfTheDay() {
+        guard let quote = quoteFor() else { return }
+
+        let shared = SharedQuote(
+            id: quote.id,
+            text: quote.text,
+            author: quote.author.isEmpty ? nil : quote.author,
+            createdAt: Date(),
+            colorStyleRaw: quote.colorStyle.rawValue
+        )
+
+        SharedQuoteStore.saveLatestQuote(shared)
+
+        #if canImport(WidgetKit)
+        WidgetCenter.shared.reloadAllTimelines()
+        #endif
+    }
+}

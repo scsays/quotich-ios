@@ -1,84 +1,76 @@
-//
-//  QuotieWidget.swift
-//  QuotieWidget
-//
-//  Created by Andre Bradford on 11/19/25.
-//
-
 import WidgetKit
 import SwiftUI
 
-struct Provider: TimelineProvider {
-    func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), emoji: "😀")
+// 1. Entry
+struct QuotieWidgetEntry: TimelineEntry {
+    let date: Date
+    let message: String
+}
+
+// 2. Provider
+struct QuotieWidgetProvider: TimelineProvider {
+    func placeholder(in context: Context) -> QuotieWidgetEntry {
+        QuotieWidgetEntry(date: Date(), message: "Placeholder")
     }
 
-    func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> ()) {
-        let entry = SimpleEntry(date: Date(), emoji: "😀")
+    func getSnapshot(in context: Context, completion: @escaping (QuotieWidgetEntry) -> Void) {
+        let entry = QuotieWidgetEntry(date: Date(), message: "Snapshot")
         completion(entry)
     }
 
-    func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
-        var entries: [SimpleEntry] = []
-
-        // Generate a timeline consisting of five entries an hour apart, starting from the current date.
-        let currentDate = Date()
-        for hourOffset in 0 ..< 5 {
-            let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
-            let entry = SimpleEntry(date: entryDate, emoji: "😀")
-            entries.append(entry)
-        }
-
-        let timeline = Timeline(entries: entries, policy: .atEnd)
+    func getTimeline(in context: Context, completion: @escaping (Timeline<QuotieWidgetEntry>) -> Void) {
+        let entry = QuotieWidgetEntry(
+            date: Date(),
+            message: "Timeline @ \(Date().formatted(date: .abbreviated, time: .standard))"
+        )
+        let timeline = Timeline(entries: [entry], policy: .never)
         completion(timeline)
     }
-
-//    func relevances() async -> WidgetRelevances<Void> {
-//        // Generate a list containing the contexts this widget is relevant in.
-//    }
 }
 
-struct SimpleEntry: TimelineEntry {
-    let date: Date
-    let emoji: String
-}
-
-struct QuotieWidgetEntryView : View {
-    var entry: Provider.Entry
+// 3. View
+struct QuotieWidgetEntryView: View {
+    var entry: QuotieWidgetEntry
 
     var body: some View {
-        VStack {
-            Text("Time:")
-            Text(entry.date, style: .time)
+        ZStack {
+            // Make sure this is super obvious so we know it's drawing
+            Color.orange.ignoresSafeArea()
 
-            Text("Emoji:")
-            Text(entry.emoji)
+            VStack(spacing: 6) {
+                Text("Quotie TEST")
+                    .font(.headline)
+                    .bold()
+
+                Text(entry.message)
+                    .font(.caption)
+                    .multilineTextAlignment(.center)
+            }
+            .padding()
         }
     }
 }
 
+// 4. Widget
 struct QuotieWidget: Widget {
+    // ⚠️ Must match the "Kind" in Info.plist
     let kind: String = "QuotieWidget"
 
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: Provider()) { entry in
-            if #available(iOS 17.0, *) {
-                QuotieWidgetEntryView(entry: entry)
-                    .containerBackground(.fill.tertiary, for: .widget)
-            } else {
-                QuotieWidgetEntryView(entry: entry)
-                    .padding()
-                    .background()
-            }
+        StaticConfiguration(kind: kind, provider: QuotieWidgetProvider()) { entry in
+            QuotieWidgetEntryView(entry: entry)
         }
-        .configurationDisplayName("My Widget")
-        .description("This is an example widget.")
+        .configurationDisplayName("Quotie Widget")
+        .description("Test widget for Quotie.")
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }
 
-#Preview(as: .systemSmall) {
-    QuotieWidget()
-} timeline: {
-    SimpleEntry(date: .now, emoji: "😀")
-    SimpleEntry(date: .now, emoji: "🤩")
+// 5. Bundle entry point
+@main
+struct QuotieWidgetBundle: WidgetBundle {
+    var body: some Widget {
+        QuotieWidget()
+        // Add other widgets / live activities here later
+    }
 }

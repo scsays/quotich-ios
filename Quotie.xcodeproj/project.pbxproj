@@ -6,19 +6,117 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C1628C442EE6857D003A8FA2 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C16334762ECEAC1300F79895 /* WidgetKit.framework */; };
+		C1628C452EE6857D003A8FA2 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C16334782ECEAC1300F79895 /* SwiftUI.framework */; };
+		C1628C522EE6857E003A8FA2 /* QuoteOfTheDayWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C1628C432EE6857D003A8FA2 /* QuoteOfTheDayWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		C163345D2ECB91D600F79895 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C16334552ECB91D600F79895 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		C1628C502EE6857E003A8FA2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C1892A2A2EC6A29100E4C95B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C1628C422EE6857D003A8FA2;
+			remoteInfo = QuoteOfTheDayWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		C163348D2ECEAC1400F79895 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				C1628C522EE6857E003A8FA2 /* QuoteOfTheDayWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		C1628C432EE6857D003A8FA2 /* QuoteOfTheDayWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = QuoteOfTheDayWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		C1628C5C2EE6870B003A8FA2 /* QuoteOfTheDayWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = QuoteOfTheDayWidgetExtension.entitlements; sourceTree = "<group>"; };
+		C16334552ECB91D600F79895 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		C16334762ECEAC1300F79895 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		C16334782ECEAC1300F79895 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		C163348E2ECEAC5800F79895 /* QuotieWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = QuotieWidgetExtension.entitlements; sourceTree = "<group>"; };
+		C17D669C2EE65CA900DF68AC /* QuotieWidget2Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = QuotieWidget2Extension.entitlements; sourceTree = "<group>"; };
 		C1892A322EC6A29100E4C95B /* Quotie.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Quotie.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C137C38B2ECEB41E00B5D10E /* Exceptions for "QuotieWidget" folder in "Quotie" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				QuoteModel.swift,
+			);
+			target = C1892A312EC6A29100E4C95B /* Quotie */;
+		};
+		C1628C562EE6857E003A8FA2 /* Exceptions for "QuoteOfTheDayWidget" folder in "QuoteOfTheDayWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = C1628C422EE6857D003A8FA2 /* QuoteOfTheDayWidgetExtension */;
+		};
+		C1628C5A2EE68654003A8FA2 /* Exceptions for "Quotie" folder in "QuoteOfTheDayWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				SharedQuoteStore.swift,
+			);
+			target = C1628C422EE6857D003A8FA2 /* QuoteOfTheDayWidgetExtension */;
+		};
+		C163346E2ECCE9F700F79895 /* Exceptions for "Quotie" folder in "Quotie" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = C1892A312EC6A29100E4C95B /* Quotie */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		C1628C462EE6857D003A8FA2 /* QuoteOfTheDayWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C1628C562EE6857E003A8FA2 /* Exceptions for "QuoteOfTheDayWidget" folder in "QuoteOfTheDayWidgetExtension" target */,
+			);
+			path = QuoteOfTheDayWidget;
+			sourceTree = "<group>";
+		};
+		C163347A2ECEAC1300F79895 /* QuotieWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C137C38B2ECEB41E00B5D10E /* Exceptions for "QuotieWidget" folder in "Quotie" target */,
+			);
+			path = QuotieWidget;
+			sourceTree = "<group>";
+		};
 		C1892A342EC6A29100E4C95B /* Quotie */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C163346E2ECCE9F700F79895 /* Exceptions for "Quotie" folder in "Quotie" target */,
+				C1628C5A2EE68654003A8FA2 /* Exceptions for "Quotie" folder in "QuoteOfTheDayWidgetExtension" target */,
+			);
 			path = Quotie;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		C1628C402EE6857D003A8FA2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C1628C452EE6857D003A8FA2 /* SwiftUI.framework in Frameworks */,
+				C1628C442EE6857D003A8FA2 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C1892A2F2EC6A29100E4C95B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -29,10 +127,26 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		C16334752ECEAC1300F79895 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C16334762ECEAC1300F79895 /* WidgetKit.framework */,
+				C16334782ECEAC1300F79895 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		C1892A292EC6A29100E4C95B = {
 			isa = PBXGroup;
 			children = (
+				C1628C5C2EE6870B003A8FA2 /* QuoteOfTheDayWidgetExtension.entitlements */,
+				C17D669C2EE65CA900DF68AC /* QuotieWidget2Extension.entitlements */,
+				C163348E2ECEAC5800F79895 /* QuotieWidgetExtension.entitlements */,
+				C16334552ECB91D600F79895 /* Assets.xcassets */,
 				C1892A342EC6A29100E4C95B /* Quotie */,
+				C163347A2ECEAC1300F79895 /* QuotieWidget */,
+				C1628C462EE6857D003A8FA2 /* QuoteOfTheDayWidget */,
+				C16334752ECEAC1300F79895 /* Frameworks */,
 				C1892A332EC6A29100E4C95B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +155,7 @@
 			isa = PBXGroup;
 			children = (
 				C1892A322EC6A29100E4C95B /* Quotie.app */,
+				C1628C432EE6857D003A8FA2 /* QuoteOfTheDayWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,6 +163,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		C1628C422EE6857D003A8FA2 /* QuoteOfTheDayWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C1628C532EE6857E003A8FA2 /* Build configuration list for PBXNativeTarget "QuoteOfTheDayWidgetExtension" */;
+			buildPhases = (
+				C1628C3F2EE6857D003A8FA2 /* Sources */,
+				C1628C402EE6857D003A8FA2 /* Frameworks */,
+				C1628C412EE6857D003A8FA2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				C1628C462EE6857D003A8FA2 /* QuoteOfTheDayWidget */,
+			);
+			name = QuoteOfTheDayWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = QuoteOfTheDayWidgetExtension;
+			productReference = C1628C432EE6857D003A8FA2 /* QuoteOfTheDayWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		C1892A312EC6A29100E4C95B /* Quotie */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = C1892A3D2EC6A29200E4C95B /* Build configuration list for PBXNativeTarget "Quotie" */;
@@ -55,10 +192,12 @@
 				C1892A2E2EC6A29100E4C95B /* Sources */,
 				C1892A2F2EC6A29100E4C95B /* Frameworks */,
 				C1892A302EC6A29100E4C95B /* Resources */,
+				C163348D2ECEAC1400F79895 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				C1628C512EE6857E003A8FA2 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				C1892A342EC6A29100E4C95B /* Quotie */,
@@ -80,6 +219,9 @@
 				LastSwiftUpdateCheck = 2610;
 				LastUpgradeCheck = 2610;
 				TargetAttributes = {
+					C1628C422EE6857D003A8FA2 = {
+						CreatedOnToolsVersion = 26.1.1;
+					};
 					C1892A312EC6A29100E4C95B = {
 						CreatedOnToolsVersion = 26.1.1;
 					};
@@ -100,21 +242,37 @@
 			projectRoot = "";
 			targets = (
 				C1892A312EC6A29100E4C95B /* Quotie */,
+				C1628C422EE6857D003A8FA2 /* QuoteOfTheDayWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		C1892A302EC6A29100E4C95B /* Resources */ = {
+		C1628C412EE6857D003A8FA2 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C1892A302EC6A29100E4C95B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C163345D2ECB91D600F79895 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		C1628C3F2EE6857D003A8FA2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C1892A2E2EC6A29100E4C95B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -124,7 +282,77 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		C1628C512EE6857E003A8FA2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C1628C422EE6857D003A8FA2 /* QuoteOfTheDayWidgetExtension */;
+			targetProxy = C1628C502EE6857E003A8FA2 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		C1628C542EE6857E003A8FA2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = QuoteOfTheDayWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = LV8JT6Z4FF;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = QuoteOfTheDayWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = QuoteOfTheDayWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.QuotichApp.Quotich.QuoteOfTheDayWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		C1628C552EE6857E003A8FA2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = QuoteOfTheDayWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = LV8JT6Z4FF;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = QuoteOfTheDayWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = QuoteOfTheDayWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.QuotichApp.Quotich.QuoteOfTheDayWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		C1892A3B2EC6A29200E4C95B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -251,11 +479,16 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Quotie/Quotie.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = TTD258V5D3;
+				DEVELOPMENT_TEAM = LV8JT6Z4FF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Quotie/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Quotich;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Quotie uses your microphone so you can dictate quotes";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Quotie uses speech recognition so you can speak quotes instead of typing them";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -266,7 +499,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "Quotie-Team.Quotie";
+				PRODUCT_BUNDLE_IDENTIFIER = com.QuotichApp.Quotich;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -283,11 +516,16 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Quotie/Quotie.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = TTD258V5D3;
+				DEVELOPMENT_TEAM = LV8JT6Z4FF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Quotie/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Quotich;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Quotie uses your microphone so you can dictate quotes";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Quotie uses speech recognition so you can speak quotes instead of typing them";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -298,7 +536,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "Quotie-Team.Quotie";
+				PRODUCT_BUNDLE_IDENTIFIER = com.QuotichApp.Quotich;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -313,6 +551,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		C1628C532EE6857E003A8FA2 /* Build configuration list for PBXNativeTarget "QuoteOfTheDayWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C1628C542EE6857E003A8FA2 /* Debug */,
+				C1628C552EE6857E003A8FA2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		C1892A2D2EC6A29100E4C95B /* Build configuration list for PBXProject "Quotie" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
