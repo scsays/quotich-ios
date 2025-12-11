@@ -149,7 +149,7 @@ struct ContentView: View {
                 }
             }
             .sheet(isPresented: $showingSettings) {
-                SettingsView()
+                SettingsView(store: store)
                     .presentationDetents([.medium, .large])
                           .presentationDragIndicator(.visible)
                           .presentationBackground(.ultraThinMaterial)

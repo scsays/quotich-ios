@@ -3,6 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme      // 👈 NEW
+    @ObservedObject var store: QuoteStore 
     private let appGroupID = "group.com.QuotichApp.Quotich"
 
     @AppStorage(
@@ -47,6 +48,25 @@ struct SettingsView: View {
                         .foregroundColor(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+#if DEBUG
+Section("Debug") {
+    HStack {
+        Text("Storage version")
+        Spacer()
+        Text("\(currentQuotesStorageVersion)")
+            .font(.system(.footnote, design: .monospaced))
+            .foregroundColor(.secondary)
+    }
+
+    HStack {
+        Text("Saved quotes")
+        Spacer()
+        Text("\(store.quotes.count)")
+            .font(.system(.footnote, design: .monospaced))
+            .foregroundColor(.secondary)
+    }
+}
+#endif
             }
             .scrollContentBackground(.hidden)                      // 👈 hide Form bg
             .background(

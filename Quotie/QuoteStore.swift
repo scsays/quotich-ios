@@ -2,6 +2,16 @@ import Foundation
 import Combine
 import WidgetKit   // <- needed for WidgetCenter
 
+// MARK: - Versioned storage envelope for saved quotes
+
+private struct StoredQuotesEnvelope: Codable {
+    let version: Int        // storage format version
+    let quotes: [Quote]
+}
+
+// Bump this if you ever change how quotes are stored on disk
+let currentQuotesStorageVersion = 1
+
 class QuoteStore: ObservableObject {
     @Published var quotes: [Quote] {
         didSet {
@@ -86,16 +96,36 @@ class QuoteStore: ObservableObject {
         }
 
         let decoder = JSONDecoder()
-        return (try? decoder.decode([Quote].self, from: data)) ?? sampleQuotes
+
+        // 1) New format: envelope { version, quotes }
+        if let envelope = try? decoder.decode(StoredQuotesEnvelope.self, from: data) {
+            return envelope.quotes
+        }
+
+        // 2) Legacy format: plain array of Quote
+        if let legacyQuotes = try? decoder.decode([Quote].self, from: data) {
+            return legacyQuotes
+        }
+
+        // 3) If both fail, fall back to built-in samples
+        return sampleQuotes
     }
 
     private func saveQuotes() {
         guard let url = Self.sharedFileURL() else { return }
+
         do {
-            let data = try JSONEncoder().encode(quotes)
+            let envelope = StoredQuotesEnvelope(
+                version: currentQuotesStorageVersion,
+                quotes: quotes
+            )
+
+            let data = try JSONEncoder().encode(envelope)
             try data.write(to: url, options: .atomic)
-            // Tell widgets “hey, data changed”
+
+            #if canImport(WidgetKit)
             WidgetCenter.shared.reloadAllTimelines()
+            #endif
         } catch {
             print("Failed to save quotes for widget: \(error)")
         }
