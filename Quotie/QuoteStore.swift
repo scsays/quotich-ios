@@ -8,7 +8,6 @@ private struct StoredQuotesEnvelope: Codable {
     let version: Int        // storage format version
     let quotes: [Quote]
 }
-
 // Bump this if you ever change how quotes are stored on disk
 let currentQuotesStorageVersion = 1
 
@@ -22,9 +21,31 @@ class QuoteStore: ObservableObject {
     init() {
         self.quotes = Self.loadQuotes()
     }
+    
+    @Published var hungerLevel: Int = 0
+    @Published var lastFedDate: Date = .now
+
+    func applyDailyHungerDecay() {
+        let calendar = Calendar.current
+        let daysPassed = calendar.dateComponents(
+            [.day],
+            from: lastFedDate,
+            to: Date()
+        ).day ?? 0
+
+        if daysPassed > 0 {
+            hungerLevel = max(hungerLevel - daysPassed, 0)
+            lastFedDate = Date()
+        }
+    }
+    func feedMonster(with quote: Quote) {
+        let bonus = quote.text.count >= 77 ? 2 : 1
+        hungerLevel = min(hungerLevel + bonus, 5)
+        lastFedDate = Date()
+    }
+
 
     // MARK: - Public API
-
     func addQuote(
         text: String,
         author: String,
@@ -41,7 +62,12 @@ class QuoteStore: ObservableObject {
             fontStyle: fontStyle
         )
         quotes.append(newQuote)
+        updateWidgetQuoteOfTheDay()
+
+        // Feed the monster whenever a quote is added
+        feedMonster(with: newQuote)
     }
+
 
     func toggleFavorite(_ quote: Quote) {
         if let index = quotes.firstIndex(where: { $0.id == quote.id }) {
@@ -51,6 +77,7 @@ class QuoteStore: ObservableObject {
 
     func delete(_ quote: Quote) {
         quotes.removeAll { $0.id == quote.id }
+        updateWidgetQuoteOfTheDay()
     }
 
     func resurfaceQuote() -> Quote? {
@@ -68,6 +95,26 @@ class QuoteStore: ObservableObject {
         } else {
             return chosen
         }
+    }
+    
+    func updateQuote(id: UUID, text: String, author: String, source: String) {
+        guard let idx = quotes.firstIndex(where: { $0.id == id }) else { return }
+
+        let old = quotes[idx]
+
+        let updated = Quote(
+            id: old.id,
+            text: text,
+            author: author,
+            source: source,
+            isFavorite: old.isFavorite,
+            colorStyle: old.colorStyle,
+            fontStyle: old.fontStyle
+        )
+
+        quotes[idx] = updated
+        // No need to call saveQuotes() explicitly because didSet on `quotes` already saves.
+        updateWidgetQuoteOfTheDay()
     }
 
     func update(_ updated: Quote) {

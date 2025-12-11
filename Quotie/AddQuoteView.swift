@@ -6,7 +6,7 @@ import Combine
 struct AddQuoteView: View {
     @Environment(\.dismiss) var dismiss
     @ObservedObject var store: QuoteStore
-    @Environment(\.colorScheme) private var colorScheme  
+    @Environment(\.colorScheme) private var scheme
 
     @State private var text = ""
     @State private var author = ""
@@ -24,125 +24,118 @@ struct AddQuoteView: View {
     @State private var showDictationDetails = false
 
     var body: some View {
+        let bg = scheme == .dark ? DesignSystem.darkPaper : DesignSystem.lightPaper
+
         NavigationView {
-            Form {
-                Section(header: Text("Quote")) {
-                    TextField("Quote text", text: $text, axis: .vertical)
-                        .lineLimit(3...6)
-                }
+            ZStack {
+                bg.ignoresSafeArea()
 
-                Section(header: Text("Author")) {
-                    TextField("Who said it?", text: $author)
-                }
+                Form {
+                    Section(header: Text("Quote")) {
+                        TextField("Quote text", text: $text, axis: .vertical)
+                            .lineLimit(3...6)
+                    }
 
-                Section(header: Text("Source")) {
-                    TextField("Where did you hear it?", text: $source)
-                }
+                    Section(header: Text("Author")) {
+                        TextField("Who said it?", text: $author)
+                    }
 
-                // Single compact "Options" bar
-                Section(header: Text("Options")) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack(spacing: 8) {
-                            // Colors button
-                            Button {
-                                withAnimation {
-                                    showColorOptions.toggle()
+                    Section(header: Text("Source")) {
+                        TextField("Where did you hear it?", text: $source)
+                    }
+
+                    Section(header: Text("Options")) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack(spacing: 8) {
+
+                                Button {
+                                    withAnimation { showColorOptions.toggle() }
+                                } label: {
+                                    Text("Colors")
+                                        .frame(minWidth: 70, minHeight: 32)
                                 }
-                            } label: {
-                                Text("Colors")
-                                    .frame(minWidth: 70, minHeight: 32)
+                                .buttonStyle(.bordered)
+                                .tint(showColorOptions ? DesignSystem.monsterPurple : .gray.opacity(0.5))
+
+                                Button {
+                                    withAnimation { showFontOptions.toggle() }
+                                } label: {
+                                    Text("Text")
+                                        .frame(minWidth: 70, minHeight: 32)
+                                }
+                                .buttonStyle(.bordered)
+                                .tint(showFontOptions ? DesignSystem.monsterPurple : .gray.opacity(0.5))
+
+                                Button {
+                                    handleSpeakButtonTapped()
+                                    withAnimation { showDictationDetails = true }
+                                } label: {
+                                    HStack {
+                                        Image(systemName: isListening ? "stop.circle.fill" : "mic.circle.fill")
+                                        Text(isListening ? "Stop Listening" : "Speak It")
+                                            .fontWeight(.semibold)
+                                    }
+                                    .frame(maxWidth: .infinity, minHeight: 32)
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .tint(DesignSystem.monsterPurple)
                             }
-                            .buttonStyle(.bordered)
-                            .tint(showColorOptions ? .blue.opacity(0.7) : .gray.opacity(0.5))
 
-                            // Text style button
-                            Button {
-                                withAnimation {
-                                    showFontOptions.toggle()
-                                }
-                            } label: {
-                                Text("Text")
-                                    .frame(minWidth: 70, minHeight: 32)
-                            }
-                            .buttonStyle(.bordered)
-                            .tint(showFontOptions ? .blue.opacity(0.7) : .gray.opacity(0.5))
-
-                            // SPEAK IT
-                            Button {
-                                handleSpeakButtonTapped()
-                                withAnimation {
-                                    showDictationDetails = true
-                                }
-                            } label: {
+                            if showColorOptions {
                                 HStack {
-                                    Image(systemName: isListening ? "stop.circle.fill" : "mic.circle.fill")
-                                    Text(isListening ? "Stop Listening" : "Speak It")
-                                        .fontWeight(.semibold)
+                                    ForEach(PastelStyle.allCases, id: \.self) { style in
+                                        Circle()
+                                            .fill(color(for: style))
+                                            .frame(
+                                                width: style == selectedColor ? 34 : 28,
+                                                height: style == selectedColor ? 34 : 28
+                                            )
+                                            .overlay(
+                                                Circle()
+                                                    .stroke(
+                                                        style == selectedColor ? Color.primary : .clear,
+                                                        lineWidth: 2
+                                                    )
+                                            )
+                                            .onTapGesture { selectedColor = style }
+                                    }
                                 }
-                                .frame(maxWidth: .infinity, minHeight: 32)
-                            }
-                            .buttonStyle(.borderedProminent)
-                            .tint(.blue)
-                        }
-
-                        // Expanded Colors picker
-                        if showColorOptions {
-                            HStack {
-                                ForEach(PastelStyle.allCases, id: \.self) { style in
-                                    Circle()
-                                        .fill(color(for: style))
-                                        .frame(
-                                            width: style == selectedColor ? 34 : 28,
-                                            height: style == selectedColor ? 34 : 28
-                                        )
-                                        .overlay(
-                                            Circle()
-                                                .stroke(
-                                                    style == selectedColor ? Color.primary : .clear,
-                                                    lineWidth: 2
-                                                )
-                                        )
-                                        .onTapGesture {
-                                            selectedColor = style
-                                        }
-                                }
-                            }
-                            .padding(.top, 4)
-                        }
-
-                        // Expanded Text Style picker
-                        if showFontOptions {
-                            Picker("Font", selection: $selectedFontStyle) {
-                                Text("Modern").tag(FontStyle.standard)
-                                Text("Poetic").tag(FontStyle.serif)
-                                Text("Personal").tag(FontStyle.rounded)
-                            }
-                            .pickerStyle(.segmented)
-                            .padding(.top, 4)
-                        }
-
-                        // Dictation hint + transcript
-                        if showDictationDetails {
-                            Text("Tip: Say: \"Quote. Author. Where you heard it.\"")
-                                .font(.footnote)
-                                .foregroundColor(.secondary)
                                 .padding(.top, 4)
+                            }
 
-                            if !speechRecognizer.transcript.isEmpty {
-                                Text("Heard: \"\(speechRecognizer.transcript)\"")
+                            if showFontOptions {
+                                Picker("Font", selection: $selectedFontStyle) {
+                                    Text("Modern").tag(FontStyle.standard)
+                                    Text("Poetic").tag(FontStyle.serif)
+                                    Text("Personal").tag(FontStyle.rounded)
+                                }
+                                .pickerStyle(.segmented)
+                                .padding(.top, 4)
+                            }
+
+                            if showDictationDetails {
+                                Text("Tip: Say: \"Quote. Author. Where you heard it.\"")
                                     .font(.footnote)
                                     .foregroundColor(.secondary)
-                                    .lineLimit(3)
-                            }
+                                    .padding(.top, 4)
 
-                            if let permissionError {
-                                Text(permissionError)
-                                    .font(.footnote)
-                                    .foregroundColor(.red)
+                                if !speechRecognizer.transcript.isEmpty {
+                                    Text("Heard: \"\(speechRecognizer.transcript)\"")
+                                        .font(.footnote)
+                                        .foregroundColor(.secondary)
+                                        .lineLimit(3)
+                                }
+
+                                if let permissionError {
+                                    Text(permissionError)
+                                        .font(.footnote)
+                                        .foregroundColor(.red)
+                                }
                             }
                         }
                     }
                 }
+                .scrollContentBackground(.hidden)
             }
             .navigationTitle("Add Quote")
             .toolbar {
@@ -168,6 +161,7 @@ struct AddQuoteView: View {
                 }
             }
         }
+        .tint(DesignSystem.monsterPurple)
     }
 
     // MARK: - Actions

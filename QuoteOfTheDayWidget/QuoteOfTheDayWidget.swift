@@ -51,13 +51,17 @@ struct QuoteOfTheDayProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<QuoteOfTheDayEntry>) -> Void) {
-        let shared = SharedQuoteStore.loadLatestQuote()
-        let entry = QuoteOfTheDayEntry(date: Date(), quote: shared)
+        let now = Date()
+        let quote = SharedQuoteStore.loadLatestQuote()
 
-        let nextUpdate = Calendar.current.date(byAdding: .minute, value: 30, to: Date())
-            ?? Date().addingTimeInterval(1800)
+        let entry = QuoteOfTheDayEntry(date: now, quote: quote)
 
-        let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
+        // Refresh shortly after midnight so it can change daily
+        let calendar = Calendar.current
+        let startOfTomorrow = calendar.startOfDay(for: calendar.date(byAdding: .day, value: 1, to: now)!)
+        let refreshDate = calendar.date(byAdding: .minute, value: 5, to: startOfTomorrow)! // 12:05am
+
+        let timeline = Timeline(entries: [entry], policy: .after(refreshDate))
         completion(timeline)
     }
 }
@@ -65,51 +69,83 @@ struct QuoteOfTheDayProvider: TimelineProvider {
 // MARK: - View
 
 struct QuoteOfTheDayEntryView: View {
-    let entry: QuoteOfTheDayEntry
+    @Environment(\.widgetFamily) private var family
+    var entry: QuoteOfTheDayEntry
 
     var body: some View {
         ZStack {
-            if let quote = entry.quote {
-                VStack(alignment: .leading, spacing: 8) {
-                    // Small label at the top
-                    Text("Quotie")
-                        .font(.system(size: 12, weight: .semibold, design: .rounded))
-                        .opacity(0.9)
 
-                    // MAIN QUOTE TEXT – bigger, no autoshrink
-                    Text("“\(quote.text)”")
-                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+            if let q = entry.quote {
+                VStack(alignment: .leading, spacing: 10) {
+
+                    // Quote text (left aligned, uses more space, scales down if needed)
+                    Text("“\(q.text)”")
+                        .font(quoteFont)
+                        .foregroundStyle(.white)
                         .multilineTextAlignment(.leading)
-                        .lineLimit(4)              // truncate instead of shrinking
-                        .truncationMode(.tail)
+                        .lineLimit(quoteLineLimit)
+                        .minimumScaleFactor(0.75)
+                        .allowsTightening(true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
 
-                    if let author = quote.author, !author.isEmpty {
+                    // Author
+                    let author = (q.author ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+                    if !author.isEmpty {
                         Text("— \(author)")
-                            .font(.system(size: 16, weight: .medium, design: .rounded))
-                            .opacity(0.9)
+                            .font(authorFont)
+                            .foregroundStyle(.white.opacity(0.9))
                             .lineLimit(1)
-                            .truncationMode(.tail)
+                            .minimumScaleFactor(0.8)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
+
+                    Spacer(minLength: 0)
                 }
-                .foregroundStyle(Color.white)
                 .padding(16)
             } else {
-                VStack(spacing: 6) {
+                VStack(alignment: .leading, spacing: 8) {
                     Text("No quote yet")
                         .font(.system(size: 18, weight: .semibold, design: .rounded))
-                    Text("Open Quotich and tap “Use in Widget”.")
+                        .foregroundStyle(.white)
+
+                    Text("Open Quotich and pick a quote for your widget.")
                         .font(.system(size: 13, weight: .medium, design: .rounded))
-                        .multilineTextAlignment(.center)
+                        .foregroundStyle(.white.opacity(0.9))
                         .lineLimit(3)
-                        .truncationMode(.tail)
+                        .minimumScaleFactor(0.85)
                 }
-                .foregroundStyle(Color.white)
                 .padding(16)
             }
         }
     }
-}
 
+    private var quoteFont: Font {
+        switch family {
+        case .systemSmall:
+            return .system(size: 17, weight: .semibold, design: .rounded)
+        default: // .systemMedium
+            return .system(size: 20, weight: .semibold, design: .rounded)
+        }
+    }
+
+    private var authorFont: Font {
+        switch family {
+        case .systemSmall:
+            return .system(size: 14, weight: .medium, design: .rounded)
+        default:
+            return .system(size: 15, weight: .medium, design: .rounded)
+        }
+    }
+
+    private var quoteLineLimit: Int {
+        switch family {
+        case .systemSmall:
+            return 5
+        default: // .systemMedium
+            return 6
+        }
+    }
+}
 // MARK: - Widget
 
 struct QuoteOfTheDayWidget: Widget {

@@ -66,7 +66,7 @@ Section("Debug") {
             .foregroundColor(.secondary)
     }
 }
-#endif
+#endif // DEBUG
             }
             .scrollContentBackground(.hidden)                      // 👈 hide Form bg
             .background(
