@@ -1,0 +1,9 @@
+# Xcode user-specific data (don’t commit)
+xcuserdata/
+*.xcuserstate
+
+# Breakpoints (personal)
+*.xcbkptlist
+
+# macOS junk
+.DS_Store
