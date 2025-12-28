@@ -27,6 +27,8 @@ struct Quote: Identifiable, Codable {
     var timesResurfaced: Int
     var lastResurfacedAt: Date?
     var fontStyle: FontStyle
+    var memmiReaction: String?
+
 
     init(
         id: UUID = UUID(),
@@ -66,4 +68,6 @@ struct Quote: Identifiable, Codable {
         lastResurfacedAt = try container.decodeIfPresent(Date.self, forKey: .lastResurfacedAt)
         fontStyle = try container.decodeIfPresent(FontStyle.self, forKey: .fontStyle) ?? .rounded
     }
+    let sampleQuotes: [Quote] = []
+
 }

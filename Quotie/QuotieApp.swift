@@ -1,9 +1,3 @@
-//
-//  QuotieApp.swift
-//  Quotie
-//
-//  Created by Andre Bradford on 11/13/25.
-//
 
 import SwiftUI
 
@@ -15,3 +9,4 @@ struct QuotieApp: App {
         }
     }
 }
+

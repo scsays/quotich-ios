@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 import WidgetKit
 
 // MARK: - Global Colors
@@ -10,23 +11,22 @@ let darkPaperBackground  = Color(red: 0.06, green: 0.06, blue: 0.08)
 
 struct ContentView: View {
     @Environment(\.colorScheme) private var colorScheme
-
     @StateObject private var store = QuoteStore()
-    @State private var highlightedQuoteID: UUID?
 
-    // UI State
+    // UI state
     @State private var showingAddSheet = false
-    @State private var showFavoritesOnly = false
-    @State private var searchText = ""
     @State private var showingSettings = false
     @State private var selectedQuoteForDetail: Quote?
+    @State private var showFavoritesOnly = false
+    @State private var searchText = ""
+    @State private var showingSnackBar = false
 
-    // Quote Monster State
-    @State private var monsterMood: MonsterMood = .neutral
+    // Monster
+    @State private var isDocked = false
     @State private var showingMonsterCard = false
-    @State private var isDocked = false   // single source of truth
 
     var body: some View {
+        
         let bg = colorScheme == .dark ? darkPaperBackground : lightPaperBackground
 
         NavigationView {
@@ -35,21 +35,11 @@ struct ContentView: View {
                 // Background
                 bg
                     .ignoresSafeArea()
-                    .background(
-                        LinearGradient(
-                            colors: [
-                                bg,
-                                bg.opacity(colorScheme == .dark ? 0.92 : 0.96)
-                            ],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
                     .onAppear {
                         store.applyDailyHungerDecay()
                     }
 
-                // Scroll Content
+                // Main feed
                 ScrollView {
                     LazyVStack(spacing: 16) {
                         cardsList
@@ -57,72 +47,81 @@ struct ContentView: View {
                     .padding(.top, 200)
                     .padding(.bottom, 16)
                 }
-                .onChange(of: searchText) {
-                    isDocked = false
-                }
-                .gesture(
-                    DragGesture(minimumDistance: 4)
-                        .onChanged { _ in
-                            if !isDocked {
-                                withAnimation(.spring(response: 0.45, dampingFraction: 0.9)) {
-                                    isDocked = true
-                                }
-                            }
-                        }
-                )
 
-                // Header
+                // Header (gear only)
                 HeaderChromeView {
                     showingSettings = true
                 }
 
-                // Floating Monster
+                // Floating monster
                 floatingMonster
             }
+
+            // ✅ Bottom bar ONLY when Snack Bar is NOT showing
             .safeAreaInset(edge: .bottom) {
-                BottomControlBar(
-                    searchText: $searchText,
-                    showFavoritesOnly: $showFavoritesOnly,
-                    onSearchTapped: {
-                        withAnimation(.spring(response: 0.45, dampingFraction: 0.9)) {
-                            isDocked = false
+                if !showingSnackBar {
+                    BottomControlBar(
+                        searchText: $searchText,
+                        showFavoritesOnly: $showFavoritesOnly,
+                        onSearchTapped: {
+                            withAnimation(.spring()) {
+                                isDocked = false
+                            }
+                        },
+                        onAddQuote: {
+                            showingAddSheet = true
+                        },
+                        onSnackBar: {
+                            showingSnackBar = true
                         }
-                    },
-                    onAddQuote: { showingAddSheet = true }
-                )
+                    )
+                }
             }
-            .background(bg)
+
             .toolbar(.hidden, for: .navigationBar)
+
+            // MARK: - Sheets & Full Screens
+
             .sheet(isPresented: $showingAddSheet) {
                 AddQuoteView(store: store)
             }
+
             .sheet(isPresented: $showingSettings) {
                 SettingsView(store: store)
             }
+
             .sheet(item: $selectedQuoteForDetail) { quote in
                 QuoteDetailView(quote: quote)
                     .environmentObject(store)
             }
+
             .sheet(isPresented: $showingMonsterCard) {
                 QuoteMonsterCardView(
                     store: store,
                     onFeedMe: { showingAddSheet = true }
                 )
             }
+
+            // ✅ Snack Bar is FULL SCREEN
+            .fullScreenCover(isPresented: $showingSnackBar) {
+                SnackBarView(onBack: {
+                    showingSnackBar = false
+                })
+                .environmentObject(store)
+            }
         }
     }
+
     // MARK: - Floating Monster
 
     private var floatingMonster: some View {
         GeometryReader { geo in
             VStack(spacing: 10) {
-                QuoteMonsterView(mood: monsterMood)
+                QuoteMonsterView(mood: .neutral)
                     .scaleEffect(isDocked ? 0.9 : 1.15)
-                    .opacity(0.95)
 
                 if !isDocked {
                     hungerMeter
-                        .transition(.opacity)
                 }
             }
             .frame(maxWidth: .infinity)
@@ -130,10 +129,7 @@ struct ContentView: View {
                 x: isDocked ? geo.size.width / 2 - 70 : 0,
                 y: isDocked ? 72 : 110
             )
-            .animation(
-                .spring(response: 0.45, dampingFraction: 0.9),
-                value: isDocked
-            )
+            .animation(.spring(), value: isDocked)
             .onTapGesture {
                 showingMonsterCard = true
             }
@@ -161,10 +157,7 @@ struct ContentView: View {
                     Capsule()
                         .fill(Color.white)
                         .frame(width: geo.size.width * hungerProgress)
-                        .shadow(
-                            color: Color.white.opacity(0.6),
-                            radius: 6
-                        )
+                        .shadow(radius: 6)
                 }
             }
             .frame(height: 8)
@@ -172,7 +165,7 @@ struct ContentView: View {
         .padding(.horizontal)
     }
 
-    // MARK: - Cards List
+    // MARK: - Cards
 
     private var cardsList: some View {
         ForEach(filteredQuotes) { quote in
@@ -183,7 +176,7 @@ struct ContentView: View {
                         store.toggleFavorite(quote)
                     }
                 },
-                isHighlighted: highlightedQuoteID == quote.id
+                isHighlighted: false
             )
             .padding(.horizontal)
             .onTapGesture {
@@ -192,25 +185,20 @@ struct ContentView: View {
         }
     }
 
-    // MARK: - Filtering
-
     private var filteredQuotes: [Quote] {
         let base = showFavoritesOnly
             ? store.quotes.filter { $0.isFavorite }
             : store.quotes
 
-        guard !searchText.trimmingCharacters(in: .whitespaces).isEmpty else {
-            return base
-        }
+        guard !searchText.isEmpty else { return base }
 
-        let lower = searchText.lowercased()
         return base.filter {
-            $0.text.lowercased().contains(lower) ||
-            $0.author.lowercased().contains(lower) ||
-            $0.source.lowercased().contains(lower)
+            $0.text.localizedCaseInsensitiveContains(searchText)
         }
     }
 }
+
+// MARK: - Header (gear only)
 
 struct HeaderChromeView: View {
     var onSettings: () -> Void
@@ -219,18 +207,13 @@ struct HeaderChromeView: View {
         HStack {
             Button(action: onSettings) {
                 Image(systemName: "gearshape.fill")
-                    .font(.system(size: 20, weight: .semibold))
                     .frame(width: 44, height: 44)
                     .background(Circle().fill(.ultraThinMaterial))
-                    .overlay(
-                        Circle().stroke(Color.white.opacity(0.25), lineWidth: 0.8)
-                    )
-                    .shadow(color: .black.opacity(0.25), radius: 8, y: 4)
             }
             Spacer()
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal)
         .padding(.top, 10)
-        .padding(.bottom, 8)
     }
 }
+

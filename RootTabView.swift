@@ -15,7 +15,6 @@ struct RootTabView: View {
 
     // Favorites filter toggle (lives at root so bar + feed share it)
     @State private var favoritesOnly: Bool = false
-    @State private var showingSnackBar = false
 
     var body: some View {
         ZStack {
@@ -29,17 +28,8 @@ struct RootTabView: View {
                     .environmentObject(store)
 
                 case .snack:
-                    SnackBarView(onBack: {
-                        withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
-                            selectedTab = .home
-                        }
-                    })
-                    .environmentObject(store)
-                    
-                    .fullScreenCover(isPresented: $showingSnackBar) {
-                        SnackBarView(onBack: { showingSnackBar = false })
-                            .environmentObject(store)
-                    }
+                    SnackBarView()
+                        .environmentObject(store)
 
                 case .account:
                     AccountView()
@@ -60,7 +50,7 @@ struct RootTabView: View {
                 )
                 .opacity(isScrolling ? 0 : 1)
                 .offset(y: isScrolling ? 20 : 0)
-                .animation(.easeOut(duration: 0.25), value: isScrolling)
+                .animation(Animation.easeOut(duration: 0.25), value: isScrolling)
 
                 // Persistent PLUS button (never fades)
                 Button(action: { showingAddQuote = true }) {

@@ -7,10 +7,21 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C12C38662EF626E100301E39 /* SharedConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12C384C2EF626E100301E39 /* SharedConfig.swift */; };
+		C12C38672EF626E100301E39 /* SharedQuoteStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12C384D2EF626E100301E39 /* SharedQuoteStore.swift */; };
+		C12C386A2EF626E100301E39 /* SharedQuoteStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12C384D2EF626E100301E39 /* SharedQuoteStore.swift */; };
+		C12C38712EF626E100301E39 /* QuoteModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12C386D2EF626E100301E39 /* QuoteModel.swift */; };
+		C12C387D2F01DA6800301E39 /* SharedConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12C384C2EF626E100301E39 /* SharedConfig.swift */; };
+		C12C387E2F01DA7000301E39 /* QuoteModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12C386D2EF626E100301E39 /* QuoteModel.swift */; };
+		C12C38AD2F01F32D00301E39 /* MemmiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12C38AC2F01F32900301E39 /* MemmiService.swift */; };
+		C12C38AF2F01F3D500301E39 /* MemmiBubble.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12C38AE2F01F3D100301E39 /* MemmiBubble.swift */; };
+		C12C38B12F0200DD00301E39 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12C38B02F0200D600301E39 /* AppConfig.swift */; };
 		C1628C442EE6857D003A8FA2 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C16334762ECEAC1300F79895 /* WidgetKit.framework */; };
 		C1628C452EE6857D003A8FA2 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C16334782ECEAC1300F79895 /* SwiftUI.framework */; };
 		C1628C522EE6857E003A8FA2 /* QuoteOfTheDayWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C1628C432EE6857D003A8FA2 /* QuoteOfTheDayWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		C163345D2ECB91D600F79895 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C16334552ECB91D600F79895 /* Assets.xcassets */; };
+		C17727052F037C20008F84E8 /* SnackBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17727042F037C13008F84E8 /* SnackBarView.swift */; };
+		C17727072F037C9A008F84E8 /* SnackQuoteLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17727062F037C96008F84E8 /* SnackQuoteLibrary.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,35 +49,29 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		C12C384C2EF626E100301E39 /* SharedConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedConfig.swift; sourceTree = "<group>"; };
+		C12C384D2EF626E100301E39 /* SharedQuoteStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedQuoteStore.swift; sourceTree = "<group>"; };
+		C12C386D2EF626E100301E39 /* QuoteModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteModel.swift; sourceTree = "<group>"; };
+		C12C38AC2F01F32900301E39 /* MemmiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemmiService.swift; sourceTree = "<group>"; };
+		C12C38AE2F01F3D100301E39 /* MemmiBubble.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemmiBubble.swift; sourceTree = "<group>"; };
+		C12C38B02F0200D600301E39 /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
 		C1628C432EE6857D003A8FA2 /* QuoteOfTheDayWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = QuoteOfTheDayWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1628C5C2EE6870B003A8FA2 /* QuoteOfTheDayWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = QuoteOfTheDayWidgetExtension.entitlements; sourceTree = "<group>"; };
 		C16334552ECB91D600F79895 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C16334762ECEAC1300F79895 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		C16334782ECEAC1300F79895 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		C163348E2ECEAC5800F79895 /* QuotieWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = QuotieWidgetExtension.entitlements; sourceTree = "<group>"; };
+		C17727042F037C13008F84E8 /* SnackBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnackBarView.swift; sourceTree = "<group>"; };
+		C17727062F037C96008F84E8 /* SnackQuoteLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnackQuoteLibrary.swift; sourceTree = "<group>"; };
 		C17D669C2EE65CA900DF68AC /* QuotieWidget2Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = QuotieWidget2Extension.entitlements; sourceTree = "<group>"; };
 		C1892A322EC6A29100E4C95B /* Quotie.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Quotie.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		C137C38B2ECEB41E00B5D10E /* Exceptions for "QuotieWidget" folder in "Quotie" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				QuoteModel.swift,
-			);
-			target = C1892A312EC6A29100E4C95B /* Quotie */;
-		};
 		C1628C562EE6857E003A8FA2 /* Exceptions for "QuoteOfTheDayWidget" folder in "QuoteOfTheDayWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
-			);
-			target = C1628C422EE6857D003A8FA2 /* QuoteOfTheDayWidgetExtension */;
-		};
-		C1628C5A2EE68654003A8FA2 /* Exceptions for "Quotie" folder in "QuoteOfTheDayWidgetExtension" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				SharedQuoteStore.swift,
 			);
 			target = C1628C422EE6857D003A8FA2 /* QuoteOfTheDayWidgetExtension */;
 		};
@@ -90,9 +95,6 @@
 		};
 		C163347A2ECEAC1300F79895 /* QuotieWidget */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				C137C38B2ECEB41E00B5D10E /* Exceptions for "QuotieWidget" folder in "Quotie" target */,
-			);
 			path = QuotieWidget;
 			sourceTree = "<group>";
 		};
@@ -100,7 +102,6 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				C163346E2ECCE9F700F79895 /* Exceptions for "Quotie" folder in "Quotie" target */,
-				C1628C5A2EE68654003A8FA2 /* Exceptions for "Quotie" folder in "QuoteOfTheDayWidgetExtension" target */,
 			);
 			path = Quotie;
 			sourceTree = "<group>";
@@ -127,6 +128,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		C12C387C2F01D8F400301E39 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				C12C386D2EF626E100301E39 /* QuoteModel.swift */,
+				C12C384D2EF626E100301E39 /* SharedQuoteStore.swift */,
+				C12C384C2EF626E100301E39 /* SharedConfig.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
 		C16334752ECEAC1300F79895 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -139,6 +150,12 @@
 		C1892A292EC6A29100E4C95B = {
 			isa = PBXGroup;
 			children = (
+				C17727062F037C96008F84E8 /* SnackQuoteLibrary.swift */,
+				C17727042F037C13008F84E8 /* SnackBarView.swift */,
+				C12C38B02F0200D600301E39 /* AppConfig.swift */,
+				C12C38AE2F01F3D100301E39 /* MemmiBubble.swift */,
+				C12C38AC2F01F32900301E39 /* MemmiService.swift */,
+				C12C387C2F01D8F400301E39 /* Shared */,
 				C1628C5C2EE6870B003A8FA2 /* QuoteOfTheDayWidgetExtension.entitlements */,
 				C17D669C2EE65CA900DF68AC /* QuotieWidget2Extension.entitlements */,
 				C163348E2ECEAC5800F79895 /* QuotieWidgetExtension.entitlements */,
@@ -217,7 +234,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2610;
-				LastUpgradeCheck = 2610;
+				LastUpgradeCheck = 2620;
 				TargetAttributes = {
 					C1628C422EE6857D003A8FA2 = {
 						CreatedOnToolsVersion = 26.1.1;
@@ -270,6 +287,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C12C387E2F01DA7000301E39 /* QuoteModel.swift in Sources */,
+				C12C386A2EF626E100301E39 /* SharedQuoteStore.swift in Sources */,
+				C12C387D2F01DA6800301E39 /* SharedConfig.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -277,6 +297,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C12C38AF2F01F3D500301E39 /* MemmiBubble.swift in Sources */,
+				C12C38B12F0200DD00301E39 /* AppConfig.swift in Sources */,
+				C12C38AD2F01F32D00301E39 /* MemmiService.swift in Sources */,
+				C17727072F037C9A008F84E8 /* SnackQuoteLibrary.swift in Sources */,
+				C17727052F037C20008F84E8 /* SnackBarView.swift in Sources */,
+				C12C38662EF626E100301E39 /* SharedConfig.swift in Sources */,
+				C12C38712EF626E100301E39 /* QuoteModel.swift in Sources */,
+				C12C38672EF626E100301E39 /* SharedQuoteStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -412,6 +440,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -469,6 +498,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};

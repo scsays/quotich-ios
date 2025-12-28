@@ -24,6 +24,8 @@ class QuoteStore: ObservableObject {
     
     @Published var hungerLevel: Int = 0
     @Published var lastFedDate: Date = .now
+    
+    @Published var lastAddedQuoteID: UUID?
 
     func applyDailyHungerDecay() {
         let calendar = Calendar.current
@@ -46,12 +48,18 @@ class QuoteStore: ObservableObject {
 
 
     // MARK: - Public API
+    func updateMemmiReaction(for quoteID: UUID, reaction: String) {
+        guard let index = quotes.firstIndex(where: { $0.id == quoteID }) else { return }
+        quotes[index].memmiReaction = reaction
+    }
+
     func addQuote(
         text: String,
         author: String,
         source: String,
         colorStyle: PastelStyle,
         fontStyle: FontStyle
+        
     ) {
         let newQuote = Quote(
             text: text,
@@ -63,9 +71,11 @@ class QuoteStore: ObservableObject {
         )
         quotes.append(newQuote)
         updateWidgetQuoteOfTheDay()
+        lastAddedQuoteID = newQuote.id
 
         // Feed the monster whenever a quote is added
         feedMonster(with: newQuote)
+
     }
 
 
@@ -97,6 +107,7 @@ class QuoteStore: ObservableObject {
         }
     }
     
+    
     func updateQuote(id: UUID, text: String, author: String, source: String) {
         guard let idx = quotes.firstIndex(where: { $0.id == id }) else { return }
 
@@ -123,16 +134,17 @@ class QuoteStore: ObservableObject {
         }
     }
 
+
     // MARK: - Persistence
 
     /// Shared location for app + widget
     private static func sharedFileURL() -> URL? {
         guard let containerURL = FileManager.default
-            .containerURL(forSecurityApplicationGroupIdentifier: sharedAppGroupID)
+            .containerURL(forSecurityApplicationGroupIdentifier: SharedConfig.appGroupID)
         else {
             return nil
         }
-        return containerURL.appendingPathComponent(sharedQuotesFilename)
+        return containerURL.appendingPathComponent(SharedConfig.quotesFilename)
     }
 
     private static func loadQuotes() -> [Quote] {
@@ -209,3 +221,4 @@ extension QuoteStore {
         #endif
     }
 }
+

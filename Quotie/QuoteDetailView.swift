@@ -8,6 +8,12 @@ struct QuoteDetailView: View {
     let quote: Quote
     @State private var showingEdit = false
 
+    // MARK: - Memmi State
+    @State private var memmiMessage: String?
+    @State private var isLoadingMemmi = false
+    @State private var showMemmiEntrance = false
+
+
     private var currentQuote: Quote {
         store.quotes.first(where: { $0.id == quote.id }) ?? quote
     }
@@ -30,6 +36,8 @@ struct QuoteDetailView: View {
 
                 bigQuoteCard
 
+                memmiSection   // ⬅️ always outside the card
+
                 actionRow
 
                 Spacer(minLength: 18)
@@ -50,7 +58,12 @@ struct QuoteDetailView: View {
             EditQuoteSheet(quote: currentQuote)
                 .environmentObject(store)
         }
+        .onAppear {
+            Task { await loadMemmi() }
+        }
     }
+
+    // MARK: - Quote Card
 
     private var bigQuoteCard: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -87,6 +100,32 @@ struct QuoteDetailView: View {
         )
     }
 
+    // MARK: - Memmi Section
+
+    private var memmiSection: some View {
+        Group {
+            if isLoadingMemmi {
+                MemmiBubble(text: "Memmi is chewing on this one…")
+                    .opacity(0.7)
+
+            } else if let memmiMessage {
+                MemmiBubble(text: memmiMessage)
+                    .scaleEffect(showMemmiEntrance ? 1.05 : 1.0)
+                    .shadow(
+                        color: showMemmiEntrance
+                            ? DesignSystem.monsterPurple.opacity(0.4)
+                            : .clear,
+                        radius: 18
+                    )
+                    .animation(.spring(response: 0.4, dampingFraction: 0.75),
+                               value: showMemmiEntrance)
+            }
+        }
+    }
+
+
+    // MARK: - Actions
+
     private var actionRow: some View {
         HStack {
             ShareLink(item: shareText) {
@@ -118,6 +157,47 @@ struct QuoteDetailView: View {
         .padding(.horizontal, 22)
     }
 
+    // MARK: - Memmi Network Call (FIXED)
+
+    private func loadMemmi() async {
+        // 1️⃣ If already cached, use it and bail
+        if let cached = currentQuote.memmiReaction {
+            memmiMessage = cached
+            return
+        }
+
+        await MainActor.run { isLoadingMemmi = true }
+
+        do {
+            let response = try await MemmiService.shared.enrichQuote(currentQuote.text)
+
+            await MainActor.run {
+                memmiMessage = response.memmi
+                isLoadingMemmi = false
+                showMemmiEntrance = true
+            }
+
+            // 2️⃣ Save the reaction back into QuoteStore
+            store.updateMemmiReaction(
+                for: currentQuote.id,
+                reaction: response.memmi
+            )
+            Task {
+                try? await Task.sleep(nanoseconds: 1_500_000_000)
+                await MainActor.run {
+                    showMemmiEntrance = false
+                }
+            }
+
+
+        } catch {
+            await MainActor.run {
+                memmiMessage = "Memmi lost the thought. Try again?"
+                isLoadingMemmi = false
+            }
+        }
+    }
+
     private func fontDesign(for style: FontStyle) -> Font.Design {
         switch style {
         case .standard: return .default
@@ -126,6 +206,10 @@ struct QuoteDetailView: View {
         }
     }
 }
+
+//
+// MARK: - Supporting Views (kept in-file to avoid scope errors)
+//
 
 private struct RoundActionButton: View {
     @Environment(\.colorScheme) private var scheme
@@ -139,57 +223,78 @@ private struct RoundActionButton: View {
             .font(.system(size: filled ? 20 : 18, weight: .heavy))
             .foregroundStyle(filled ? .white : DesignSystem.primaryText(scheme))
             .frame(width: size, height: size)
-            .background(
-                Circle().fill(backgroundFill)
-            )
+            .background(Circle().fill(backgroundFill))
             .overlay(
                 Circle().stroke(Color.white.opacity(scheme == .dark ? 0.12 : 0.22), lineWidth: 0.8)
             )
             .shadow(color: Color.black.opacity(scheme == .dark ? 0.35 : 0.12), radius: 14, y: 8)
-            .contentShape(Circle())
     }
 
-    // Avoids the “Color vs Material” ternary type mismatch by returning AnyShapeStyle
     private var backgroundFill: AnyShapeStyle {
-        if filled {
-            return AnyShapeStyle(DesignSystem.monsterPurple)
-        } else {
-            return AnyShapeStyle(.ultraThinMaterial)
-        }
+        filled
+        ? AnyShapeStyle(DesignSystem.monsterPurple)
+        : AnyShapeStyle(.ultraThinMaterial)
     }
 }
+
+// MARK: - Edit Quote Sheet (restored to fix scope error)
 
 private struct EditQuoteSheet: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var store: QuoteStore
-    
     @Environment(\.colorScheme) private var scheme
-    @State private var colorStyle: PastelStyle = .mint
-    
+
     let quote: Quote
-    
+
     @State private var text: String = ""
     @State private var author: String = ""
     @State private var source: String = ""
-    
+    @State private var colorStyle: PastelStyle = .mint
+
     var body: some View {
         NavigationView {
-            let bg = scheme == .dark ? DesignSystem.darkPaper : DesignSystem.lightPaper
+            let bg = scheme == .dark
+                ? DesignSystem.darkPaper
+                : DesignSystem.lightPaper
+
             ZStack {
                 bg.ignoresSafeArea()
+
                 Form {
                     Section("Quote") {
                         TextEditor(text: $text)
                             .frame(minHeight: 120)
                     }
+
                     Section("Details") {
                         TextField("Author", text: $author)
                         TextField("Source", text: $source)
                     }
+
                     Section("Card Color") {
                         colorPickerGrid
                     }
                     .scrollContentBackground(.hidden)
+                    Section {
+                        Button(role: .destructive) {
+                            store.delete(quote)
+                            dismiss()
+                        } label: {
+                            Text("Delete Quote")
+                                .font(.headline)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 14)
+                        }
+                    }
+                    .listRowBackground(
+                        Capsule()
+                            .fill(
+                                scheme == .dark
+                                ? Color.red.opacity(0.75)
+                                : Color.red.opacity(0.85)
+                            )
+                    )
+
                 }
                 .navigationTitle("Edit Quote")
                 .toolbar {
@@ -223,38 +328,34 @@ private struct EditQuoteSheet: View {
                     source = quote.source
                     colorStyle = quote.colorStyle
                 }
-                
+                .padding(.top, 24)
+
             }
-            
         }
-        
     }
+
     private var colorPickerGrid: some View {
         LazyVGrid(
             columns: Array(repeating: GridItem(.flexible(), spacing: 10), count: 5),
             spacing: 10
         ) {
             ForEach(PastelStyle.allCases, id: \.self) { style in
-                colorSwatch(style)
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(DesignSystem.cardGradient(for: style, scheme: scheme))
+                    .frame(height: 34)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(
+                                style == colorStyle
+                                    ? DesignSystem.monsterPurple
+                                    : Color.white.opacity(0.18),
+                                lineWidth: style == colorStyle ? 2 : 1
+                            )
+                    )
+                    .onTapGesture { colorStyle = style }
             }
         }
         .padding(.vertical, 6)
-    }
-    @ViewBuilder
-    private func colorSwatch(_ style: PastelStyle) -> some View {
-        let isSelected = (style == colorStyle)
-
-        RoundedRectangle(cornerRadius: 12, style: .continuous)
-            .fill(DesignSystem.cardGradient(for: style, scheme: scheme))
-            .frame(height: 34)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .stroke(
-                        isSelected ? DesignSystem.monsterPurple : Color.white.opacity(0.18),
-                        lineWidth: isSelected ? 2 : 1
-                    )
-            )
-            .onTapGesture { colorStyle = style }
     }
 }
 
