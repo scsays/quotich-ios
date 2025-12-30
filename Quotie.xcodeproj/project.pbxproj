@@ -22,6 +22,8 @@
 		C163345D2ECB91D600F79895 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C16334552ECB91D600F79895 /* Assets.xcassets */; };
 		C17727052F037C20008F84E8 /* SnackBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17727042F037C13008F84E8 /* SnackBarView.swift */; };
 		C17727072F037C9A008F84E8 /* SnackQuoteLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17727062F037C96008F84E8 /* SnackQuoteLibrary.swift */; };
+		C18B2A312F08995F00B395FE /* MemmiNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18B2A302F08995800B395FE /* MemmiNotifications.swift */; };
+		C18B2A332F09C77D00B395FE /* OnboardingFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18B2A322F09C77700B395FE /* OnboardingFlowView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -65,6 +67,8 @@
 		C17727062F037C96008F84E8 /* SnackQuoteLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnackQuoteLibrary.swift; sourceTree = "<group>"; };
 		C17D669C2EE65CA900DF68AC /* QuotieWidget2Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = QuotieWidget2Extension.entitlements; sourceTree = "<group>"; };
 		C1892A322EC6A29100E4C95B /* Quotie.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Quotie.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C18B2A302F08995800B395FE /* MemmiNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemmiNotifications.swift; sourceTree = "<group>"; };
+		C18B2A322F09C77700B395FE /* OnboardingFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlowView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -150,6 +154,8 @@
 		C1892A292EC6A29100E4C95B = {
 			isa = PBXGroup;
 			children = (
+				C18B2A322F09C77700B395FE /* OnboardingFlowView.swift */,
+				C18B2A302F08995800B395FE /* MemmiNotifications.swift */,
 				C17727062F037C96008F84E8 /* SnackQuoteLibrary.swift */,
 				C17727042F037C13008F84E8 /* SnackBarView.swift */,
 				C12C38B02F0200D600301E39 /* AppConfig.swift */,
@@ -297,8 +303,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C18B2A332F09C77D00B395FE /* OnboardingFlowView.swift in Sources */,
 				C12C38AF2F01F3D500301E39 /* MemmiBubble.swift in Sources */,
 				C12C38B12F0200DD00301E39 /* AppConfig.swift in Sources */,
+				C18B2A312F08995F00B395FE /* MemmiNotifications.swift in Sources */,
 				C12C38AD2F01F32D00301E39 /* MemmiService.swift in Sources */,
 				C17727072F037C9A008F84E8 /* SnackQuoteLibrary.swift in Sources */,
 				C17727052F037C20008F84E8 /* SnackBarView.swift in Sources */,

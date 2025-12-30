@@ -86,8 +86,8 @@ struct ContentView: View {
                 AddQuoteView(store: store)
             }
 
-            .sheet(isPresented: $showingSettings) {
-                SettingsView(store: store)
+            .fullScreenCover(isPresented: $showingSettings) {
+                SettingsView(store: store, onBack: { showingSettings = false })
             }
 
             .sheet(item: $selectedQuoteForDetail) { quote in

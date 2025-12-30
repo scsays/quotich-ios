@@ -1,53 +1,84 @@
 import Foundation
 import Combine
-import WidgetKit   // <- needed for WidgetCenter
+import WidgetKit   // needed for WidgetCenter
 
 // MARK: - Versioned storage envelope for saved quotes
 
 private struct StoredQuotesEnvelope: Codable {
-    let version: Int        // storage format version
+    let version: Int
     let quotes: [Quote]
 }
+
 // Bump this if you ever change how quotes are stored on disk
 let currentQuotesStorageVersion = 1
 
-class QuoteStore: ObservableObject {
+final class QuoteStore: ObservableObject {
+
+    // MARK: - UserDefaults Keys (hunger persistence)
+    private let hungerKey = "memmi.hungerLevel"
+    private let lastFedKey = "memmi.lastFedDate"
+
+    // MARK: - Quotes
     @Published var quotes: [Quote] {
         didSet {
-            saveQuotes()   // <- now matches the function name below
+            saveQuotes()
         }
     }
 
+    // MARK: - Hunger / Monster State (persisted)
+    @Published var hungerLevel: Int {
+        didSet {
+            guard hungerLevel != oldValue else { return }
+            persistHungerState()
+            MemmiNotifications.shared.refreshHungryNudge(hungerLevel: hungerLevel)
+        }
+    }
+
+    @Published var lastFedDate: Date {
+        didSet {
+            persistHungerState()
+        }
+    }
+
+    @Published var lastAddedQuoteID: UUID?
+
+    // MARK: - Init
     init() {
         self.quotes = Self.loadQuotes()
+
+        let defaults = UserDefaults.standard
+        let storedHunger = defaults.integer(forKey: hungerKey)
+
+        // Date may not exist yet on first launch
+        let storedLastFed = defaults.object(forKey: lastFedKey) as? Date ?? Date()
+
+        self.hungerLevel = storedHunger
+        self.lastFedDate = storedLastFed
+
+        // Apply decay after loading persisted values so state is correct
+        applyDailyHungerDecay()
     }
-    
-    @Published var hungerLevel: Int = 0
-    @Published var lastFedDate: Date = .now
-    
-    @Published var lastAddedQuoteID: UUID?
+
+    // MARK: - Hunger Logic
 
     func applyDailyHungerDecay() {
         let calendar = Calendar.current
-        let daysPassed = calendar.dateComponents(
-            [.day],
-            from: lastFedDate,
-            to: Date()
-        ).day ?? 0
+        let daysPassed = calendar.dateComponents([.day], from: lastFedDate, to: Date()).day ?? 0
 
-        if daysPassed > 0 {
-            hungerLevel = max(hungerLevel - daysPassed, 0)
-            lastFedDate = Date()
-        }
+        guard daysPassed > 0 else { return }
+
+        hungerLevel = max(hungerLevel - daysPassed, 0)
+        lastFedDate = Date()
     }
+
     func feedMonster(with quote: Quote) {
         let bonus = quote.text.count >= 77 ? 2 : 1
         hungerLevel = min(hungerLevel + bonus, 5)
         lastFedDate = Date()
     }
 
-
     // MARK: - Public API
+
     func updateMemmiReaction(for quoteID: UUID, reaction: String) {
         guard let index = quotes.firstIndex(where: { $0.id == quoteID }) else { return }
         quotes[index].memmiReaction = reaction
@@ -59,7 +90,6 @@ class QuoteStore: ObservableObject {
         source: String,
         colorStyle: PastelStyle,
         fontStyle: FontStyle
-        
     ) {
         let newQuote = Quote(
             text: text,
@@ -69,15 +99,14 @@ class QuoteStore: ObservableObject {
             colorStyle: colorStyle,
             fontStyle: fontStyle
         )
+
         quotes.append(newQuote)
         updateWidgetQuoteOfTheDay()
         lastAddedQuoteID = newQuote.id
 
         // Feed the monster whenever a quote is added
         feedMonster(with: newQuote)
-
     }
-
 
     func toggleFavorite(_ quote: Quote) {
         if let index = quotes.firstIndex(where: { $0.id == quote.id }) {
@@ -106,11 +135,9 @@ class QuoteStore: ObservableObject {
             return chosen
         }
     }
-    
-    
+
     func updateQuote(id: UUID, text: String, author: String, source: String) {
         guard let idx = quotes.firstIndex(where: { $0.id == id }) else { return }
-
         let old = quotes[idx]
 
         let updated = Quote(
@@ -124,7 +151,6 @@ class QuoteStore: ObservableObject {
         )
 
         quotes[idx] = updated
-        // No need to call saveQuotes() explicitly because didSet on `quotes` already saves.
         updateWidgetQuoteOfTheDay()
     }
 
@@ -134,8 +160,15 @@ class QuoteStore: ObservableObject {
         }
     }
 
+    // MARK: - Hunger Persistence
 
-    // MARK: - Persistence
+    private func persistHungerState() {
+        let defaults = UserDefaults.standard
+        defaults.set(hungerLevel, forKey: hungerKey)
+        defaults.set(lastFedDate, forKey: lastFedKey)
+    }
+
+    // MARK: - Quote Persistence (App Group: app + widget)
 
     /// Shared location for app + widget
     private static func sharedFileURL() -> URL? {
@@ -190,13 +223,14 @@ class QuoteStore: ObservableObject {
         }
     }
 }
+
+// MARK: - Widget Helpers
 extension QuoteStore {
 
     /// Deterministic "random" quote for a given day.
     func quoteFor(date: Date = Date()) -> Quote? {
         guard !quotes.isEmpty else { return nil }
 
-        // Day-of-year → stable index for that day
         let dayOfYear = Calendar.current.ordinality(of: .day, in: .year, for: date) ?? 0
         let index = dayOfYear % quotes.count
         return quotes[index]
@@ -221,4 +255,3 @@ extension QuoteStore {
         #endif
     }
 }
-

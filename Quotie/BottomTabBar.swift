@@ -6,6 +6,7 @@ struct BottomTabBar: View {
     @Binding var selectedTab: AppTab
     @Binding var favoritesOnly: Bool
 
+    var onSnackTapped: () -> Void
     var onSearchTapped: () -> Void
     var onAddTapped: () -> Void
     var showsAddButton: Bool = true
@@ -42,7 +43,6 @@ struct BottomTabBar: View {
                 .foregroundStyle(favoritesOnly ? DesignSystem.monsterPurple : .secondary)
             }
 
-            
             // Add Quote (big +)
             if showsAddButton {
                 Button(action: onAddTapped) {
@@ -62,8 +62,19 @@ struct BottomTabBar: View {
                     .frame(width: 54, height: 54)
             }
 
-            // Snack Bar (tab destination)
-            tabButton(tab: .snack, system: "tray", title: "Snack Bar")
+            // Snack Bar (modal destination)
+            Button {
+                onSnackTapped()
+            } label: {
+                VStack(spacing: 4) {
+                    Image(systemName: "tray")
+                        .font(.system(size: 18, weight: .semibold))
+                    Text("Snack Bar")
+                        .font(.caption2)
+                }
+                .frame(maxWidth: .infinity)
+                .foregroundStyle(DesignSystem.monsterPurple)
+            }
 
             // Account (tab destination)
             tabButton(tab: .account, system: "person.crop.circle", title: "Account")
@@ -86,7 +97,6 @@ struct BottomTabBar: View {
             selectedTab = tab
         } label: {
             VStack(spacing: 4) {
-                // IMPORTANT: uses the passed-in `system` value
                 Image(systemName: system)
                     .font(.system(size: 18, weight: .semibold))
                 Text(title)
