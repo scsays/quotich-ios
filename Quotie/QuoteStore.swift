@@ -18,11 +18,16 @@ final class QuoteStore: ObservableObject {
     private let hungerKey = "memmi.hungerLevel"
     private let lastFedKey = "memmi.lastFedDate"
 
+    // MARK: - Devour Log (stats)
+    private let devourLogKey = "memmi.devourLog.v1"
+
+    @Published private(set) var devourLog: [DevourEvent] = [] {
+        didSet { persistDevourLog() }
+    }
+
     // MARK: - Quotes
     @Published var quotes: [Quote] {
-        didSet {
-            saveQuotes()
-        }
+        didSet { saveQuotes() }
     }
 
     // MARK: - Hunger / Monster State (persisted)
@@ -35,9 +40,7 @@ final class QuoteStore: ObservableObject {
     }
 
     @Published var lastFedDate: Date {
-        didSet {
-            persistHungerState()
-        }
+        didSet { persistHungerState() }
     }
 
     @Published var lastAddedQuoteID: UUID?
@@ -48,12 +51,11 @@ final class QuoteStore: ObservableObject {
 
         let defaults = UserDefaults.standard
         let storedHunger = defaults.integer(forKey: hungerKey)
-
-        // Date may not exist yet on first launch
         let storedLastFed = defaults.object(forKey: lastFedKey) as? Date ?? Date()
 
         self.hungerLevel = storedHunger
         self.lastFedDate = storedLastFed
+        self.devourLog = Self.loadDevourLog(key: devourLogKey)
 
         // Apply decay after loading persisted values so state is correct
         applyDailyHungerDecay()
@@ -64,7 +66,6 @@ final class QuoteStore: ObservableObject {
     func applyDailyHungerDecay() {
         let calendar = Calendar.current
         let daysPassed = calendar.dateComponents([.day], from: lastFedDate, to: Date()).day ?? 0
-
         guard daysPassed > 0 else { return }
 
         hungerLevel = max(hungerLevel - daysPassed, 0)
@@ -75,6 +76,14 @@ final class QuoteStore: ObservableObject {
         let bonus = quote.text.count >= 77 ? 2 : 1
         hungerLevel = min(hungerLevel + bonus, 5)
         lastFedDate = Date()
+
+        // ✅ Log a devour event for stats
+        let normalized = quote.source.trimmingCharacters(in: .whitespacesAndNewlines)
+        let event = DevourEvent(
+            quoteID: quote.id,
+            source: normalized.isEmpty ? "Unknown" : normalized
+        )
+        devourLog.append(event)
     }
 
     // MARK: - Public API
@@ -97,7 +106,9 @@ final class QuoteStore: ObservableObject {
             source: source,
             isFavorite: false,
             colorStyle: colorStyle,
-            fontStyle: fontStyle
+            fontStyle: fontStyle,
+            memmiReaction: nil,
+              createdAt: Date()
         )
 
         quotes.append(newQuote)
@@ -168,15 +179,38 @@ final class QuoteStore: ObservableObject {
         defaults.set(lastFedDate, forKey: lastFedKey)
     }
 
+    // MARK: - Devour Log Persistence
+
+    private static func loadDevourLog(key: String) -> [DevourEvent] {
+        let defaults = UserDefaults.standard
+        guard let data = defaults.data(forKey: key) else { return [] }
+
+        do {
+            return try JSONDecoder().decode([DevourEvent].self, from: data)
+        } catch {
+            print("Failed to decode devour log: \(error)")
+            return []
+        }
+    }
+
+    private func persistDevourLog() {
+        let defaults = UserDefaults.standard
+        do {
+            let data = try JSONEncoder().encode(devourLog)
+            defaults.set(data, forKey: devourLogKey)
+        } catch {
+            print("Failed to encode devour log: \(error)")
+        }
+    }
+
     // MARK: - Quote Persistence (App Group: app + widget)
 
     /// Shared location for app + widget
     private static func sharedFileURL() -> URL? {
         guard let containerURL = FileManager.default
             .containerURL(forSecurityApplicationGroupIdentifier: SharedConfig.appGroupID)
-        else {
-            return nil
-        }
+        else { return nil }
+
         return containerURL.appendingPathComponent(SharedConfig.quotesFilename)
     }
 
@@ -230,7 +264,6 @@ extension QuoteStore {
     /// Deterministic "random" quote for a given day.
     func quoteFor(date: Date = Date()) -> Quote? {
         guard !quotes.isEmpty else { return nil }
-
         let dayOfYear = Calendar.current.ordinality(of: .day, in: .year, for: date) ?? 0
         let index = dayOfYear % quotes.count
         return quotes[index]
@@ -255,3 +288,40 @@ extension QuoteStore {
         #endif
     }
 }
+extension QuoteStore {
+
+    private func quotesAddedInLast7Days(from now: Date = Date()) -> [Quote] {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -7, to: now) ?? now
+        return quotes.filter { $0.createdAt >= cutoff }
+    }
+
+    func devoursThisWeekCount() -> Int {
+        quotesAddedInLast7Days().count
+    }
+
+    func devoursAllTimeCount() -> Int {
+        quotes.count
+    }
+
+    func topSourceLast7Days() -> String? {
+        let recent = quotesAddedInLast7Days()
+        guard !recent.isEmpty else { return nil }
+
+        var counts: [String: Int] = [:]
+        for q in recent {
+            let trimmed = q.source.trimmingCharacters(in: .whitespacesAndNewlines)
+            let key = trimmed.isEmpty ? "Unknown" : trimmed
+            counts[key, default: 0] += 1
+        }
+
+        return counts.max(by: { $0.value < $1.value })?.key
+    }
+
+    /// Quotes added in the last 7 days (used for mood generation)
+    func weeklyDevouredQuoteTexts() -> [String] {
+        quotesAddedInLast7Days()
+            .sorted(by: { $0.createdAt < $1.createdAt })
+            .map { $0.text }
+    }
+}
+

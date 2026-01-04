@@ -37,7 +37,7 @@ struct QuoteOfTheDayProvider: TimelineProvider {
         let sample = SharedQuote(
             id: UUID(),
             text: "Your next favorite quote will show up here.",
-            author: "Quotie",
+            author: "Memmi",
             createdAt: Date(),
             colorStyleRaw: "mint"
         )
@@ -45,14 +45,14 @@ struct QuoteOfTheDayProvider: TimelineProvider {
     }
 
     func getSnapshot(in context: Context, completion: @escaping (QuoteOfTheDayEntry) -> Void) {
-        let shared = SharedQuoteStore.loadLatestQuote()
-        let entry = QuoteOfTheDayEntry(date: Date(), quote: shared)
+        let quote = SharedQuoteStore.loadWidgetQuote()
+        let entry = QuoteOfTheDayEntry(date: Date(), quote: quote)
         completion(entry)
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<QuoteOfTheDayEntry>) -> Void) {
         let now = Date()
-        let quote = SharedQuoteStore.loadLatestQuote()
+        let quote = SharedQuoteStore.loadWidgetQuote()
 
         let entry = QuoteOfTheDayEntry(date: now, quote: quote)
 
@@ -108,7 +108,7 @@ struct QuoteOfTheDayEntryView: View {
                         .font(.system(size: 18, weight: .semibold, design: .rounded))
                         .foregroundStyle(.white)
 
-                    Text("Open Quotich and pick a quote for your widget.")
+                    Text("Open Memmi and pick a quote for your widget.")
                         .font(.system(size: 13, weight: .medium, design: .rounded))
                         .foregroundStyle(.white.opacity(0.9))
                         .lineLimit(3)
@@ -163,7 +163,7 @@ struct QuoteOfTheDayWidget: Widget {
                     )
                 }
         }
-        .configurationDisplayName("Latest Quotie")
+        .configurationDisplayName("Latest Memmi")
         .description("Shows your most recently selected quote.")
         .supportedFamilies([.systemSmall, .systemMedium])
     }

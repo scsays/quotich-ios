@@ -27,8 +27,12 @@ struct Quote: Identifiable, Codable {
     var timesResurfaced: Int
     var lastResurfacedAt: Date?
     var fontStyle: FontStyle
+
+    // ✅ Persisted reaction text
     var memmiReaction: String?
 
+    // ✅ NEW: used for “added this week” stats
+    var createdAt: Date
 
     init(
         id: UUID = UUID(),
@@ -39,7 +43,9 @@ struct Quote: Identifiable, Codable {
         colorStyle: PastelStyle = .mint,
         timesResurfaced: Int = 0,
         lastResurfacedAt: Date? = nil,
-        fontStyle: FontStyle = .rounded
+        fontStyle: FontStyle = .rounded,
+        memmiReaction: String? = nil,
+        createdAt: Date = Date()
     ) {
         self.id = id
         self.text = text
@@ -50,24 +56,38 @@ struct Quote: Identifiable, Codable {
         self.timesResurfaced = timesResurfaced
         self.lastResurfacedAt = lastResurfacedAt
         self.fontStyle = fontStyle
+        self.memmiReaction = memmiReaction
+        self.createdAt = createdAt
     }
 
     private enum CodingKeys: String, CodingKey {
-        case id, text, author, source, isFavorite, colorStyle, timesResurfaced, lastResurfacedAt, fontStyle
+        case id, text, author, source
+        case isFavorite, colorStyle
+        case timesResurfaced, lastResurfacedAt
+        case fontStyle
+        case memmiReaction
+        case createdAt
     }
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+
         id = try container.decode(UUID.self, forKey: .id)
         text = try container.decode(String.self, forKey: .text)
         author = try container.decode(String.self, forKey: .author)
         source = try container.decode(String.self, forKey: .source)
+
         isFavorite = try container.decodeIfPresent(Bool.self, forKey: .isFavorite) ?? false
         colorStyle = try container.decodeIfPresent(PastelStyle.self, forKey: .colorStyle) ?? .mint
         timesResurfaced = try container.decodeIfPresent(Int.self, forKey: .timesResurfaced) ?? 0
         lastResurfacedAt = try container.decodeIfPresent(Date.self, forKey: .lastResurfacedAt)
         fontStyle = try container.decodeIfPresent(FontStyle.self, forKey: .fontStyle) ?? .rounded
-    }
-    let sampleQuotes: [Quote] = []
 
+        // ✅ keep reactions across relaunches
+        memmiReaction = try container.decodeIfPresent(String.self, forKey: .memmiReaction)
+
+        // ✅ important: old saved quotes won’t have this key
+        // Use distantPast so they count as “all time” but NOT “this week.”
+        createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? .distantPast
+    }
 }

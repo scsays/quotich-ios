@@ -148,13 +148,13 @@ struct QuotieWidgetEntryView: View {
 
 // MARK: - Widget
 struct QuotieWidget: Widget {
-    let kind: String = "QuotieWidget"
+    let kind: String = "MemmiWidget"
 
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: QuotieWidgetProvider()) { entry in
             QuotieWidgetEntryView(entry: entry)
         }
-        .configurationDisplayName("Quotie")
+        .configurationDisplayName("Memmi")
         .description("A daily quote from your collection.")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }

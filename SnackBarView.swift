@@ -2,19 +2,29 @@ import SwiftUI
 
 // MARK: - Snack Models
 
-enum SnackSource: String, CaseIterable {
+enum SnackSource: String, CaseIterable, Identifiable {
     case books = "Books"
     case songs = "Songs"
     case movies = "Movies"
     case podcasts = "Podcasts"
+
+    var id: String { rawValue }
 }
 
-struct SnackQuote: Identifiable {
-    let id = UUID()
+struct SnackQuote: Identifiable, Equatable {
+    let id: String          // deterministic
     let text: String
     let author: String
     let origin: String
     let source: SnackSource
+
+    init(text: String, author: String, origin: String, source: SnackSource) {
+        self.text = text
+        self.author = author
+        self.origin = origin
+        self.source = source
+        self.id = "\(source.rawValue)|\(author)|\(origin)|\(text)"
+    }
 }
 
 // MARK: - Snack Bar View
@@ -23,13 +33,15 @@ struct SnackBarView: View {
     @EnvironmentObject private var store: QuoteStore
     @Environment(\.colorScheme) private var scheme
 
-    /// Snack Bar is presented as a fullScreenCover in your current setup,
-    /// so `onBack` should dismiss that cover.
     var onBack: () -> Void
 
     @State private var selectedSource: SnackSource? = nil
     @State private var expandedSnack: SnackQuote? = nil
     @State private var recommendedSnacks: [SnackQuote] = []
+
+    // Must match SnackQuote.id type (String)
+    @State private var addedSnackIDs: Set<String> = []
+    @State private var dismissedSnackIDs: Set<String> = []
 
     // Scroll effects
     @State private var scrollY: CGFloat = 0
@@ -37,14 +49,15 @@ struct SnackBarView: View {
     private let allSnacks: [SnackQuote] = SnackQuoteLibrary.all
 
     private var displayedSnacks: [SnackQuote] {
+        let base: [SnackQuote]
         if let selectedSource {
-            return allSnacks.filter { $0.source == selectedSource }
+            base = allSnacks.filter { $0.source == selectedSource }
         } else {
-            return recommendedSnacks
+            base = recommendedSnacks
         }
+        return base.filter { !dismissedSnackIDs.contains($0.id) }
     }
 
-    // 0 = fully visible header, 1 = faded/blurred header state
     private var headerT: CGFloat {
         let start: CGFloat = 10
         let end: CGFloat = 140
@@ -55,12 +68,12 @@ struct SnackBarView: View {
     var body: some View {
         let bg = scheme == .dark ? DesignSystem.darkPaper : DesignSystem.lightPaper
 
-        NavigationStack {
+        NavigationView {
             ZStack {
                 bg.ignoresSafeArea()
 
                 ScrollView {
-                    VStack(spacing: 14) {
+                    VStack(alignment: .leading, spacing: 18) {
 
                         headerAndSources
                             .padding(.top, 6)
@@ -70,16 +83,18 @@ struct SnackBarView: View {
                                 SnackQuoteCard(
                                     snack: snack,
                                     scheme: scheme,
+                                    isAdded: addedSnackIDs.contains(snack.id),
                                     onExpand: { expandedSnack = snack },
-                                    onQuickAdd: { addSnack(snack) }
+                                    onQuickAdd: { quickAddSnack(snack) }
                                 )
+                                .transition(.move(edge: .trailing).combined(with: .opacity))
                             }
                         }
-                        .padding(.top, 6)
+                        .animation(.spring(response: 0.35, dampingFraction: 0.92), value: displayedSnacks)
 
                         Spacer(minLength: 40)
                     }
-                    .padding(.horizontal, 16)
+                    .padding(16)
                     .padding(.bottom, 40)
                 }
                 .onScrollGeometryChange(for: CGFloat.self) { geo in
@@ -97,7 +112,7 @@ struct SnackBarView: View {
                     SnackExpandedView(
                         snack: snack,
                         onAdd: {
-                            addSnack(snack)
+                            quickAddSnack(snack)
                             expandedSnack = nil
                         },
                         onBack: {
@@ -109,22 +124,12 @@ struct SnackBarView: View {
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button {
-                        onBack()
-                    } label: {
-                        HStack(spacing: 6) {
-                            Image(systemName: "chevron.left")
-                            Text("Back")
-                        }
-                    }
+                    Button("Back") { onBack() }   // ✅ matches Search
                 }
-
                 ToolbarItem(placement: .principal) {
-                    Text("Snack Bar")
-                        .font(.title3.weight(.bold))
+                    Text("Snack Bar").font(.headline) // ✅ matches Search
                 }
             }
         }
@@ -138,9 +143,9 @@ struct SnackBarView: View {
         let fade = 1 - Double(0.55 * t)
         let lift = -22 * t
 
-        return VStack(spacing: 14) {
+        return VStack(alignment: .leading, spacing: 12) {
             header
-            sourcePicker
+            sourcesGrid
         }
         .opacity(fade)
         .blur(radius: blur)
@@ -154,68 +159,65 @@ struct SnackBarView: View {
                 .font(.title3.weight(.bold))
 
             Text("Quick bites for the soul")
-                .font(.callout)               // ✅ slightly larger than subheadline
+                .font(.callout)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
         }
-        .frame(maxWidth: .infinity, alignment: .center)
+        .frame(maxWidth: .infinity)
         .padding(.top, 4)
     }
 
-    // MARK: - Sources (stacked like Search)
+    // ✅ Matches SearchView’s 2x2 source layout
+    private var sourcesGrid: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Sources")
+                .font(.headline)
+                .foregroundStyle(DesignSystem.primaryText(scheme))
 
-    private var sourcePicker: some View {
-        VStack(spacing: 12) {
-            ForEach(SnackSource.allCases, id: \.self) { source in
-                let isSelected = (selectedSource == source)
+            let items: [(SnackSource, String)] = [
+                (.books, "book.closed"),
+                (.songs, "music.note"),
+                (.movies, "film"),
+                (.podcasts, "mic")
+            ]
 
-                Button {
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
-                        selectedSource = isSelected ? nil : source
-                    }
-                } label: {
-                    HStack(spacing: 12) {
-                        Image(systemName: icon(for: source))
-                            .font(.system(size: 18, weight: .semibold))
-                            .frame(width: 34)
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                ForEach(items, id: \.0.id) { src, icon in
+                    let isSelected = (selectedSource == src)
 
-                        Text(source.rawValue)
-                            .font(.headline)
+                    Button {
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
+                            selectedSource = isSelected ? nil : src
+                        }
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: icon)
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundStyle(isSelected ? .white : DesignSystem.monsterPurple)
 
-                        Spacer()
+                            Text(src.rawValue)
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(isSelected ? .white : DesignSystem.primaryText(scheme))
 
-                        if isSelected {
-                            Image(systemName: "checkmark.circle.fill")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundStyle(DesignSystem.monsterPurple)
-                        } else {
-                            Image(systemName: "chevron.right")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundStyle(.secondary)
+                            Spacer()
+
+                            if isSelected {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundStyle(.white.opacity(0.95))
+                            }
+                        }
+                        .padding(12)
+                        .liquidGlass(cornerRadius: 18, scheme: scheme)
+                        .overlay {
+                            if isSelected {
+                                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                    .fill(DesignSystem.monsterPurple.opacity(scheme == .dark ? 0.30 : 0.22))
+                            }
                         }
                     }
-                    .foregroundStyle(DesignSystem.primaryText(scheme))
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 14)
-                    .liquidGlass(cornerRadius: 22, scheme: scheme)
-                    .overlay {
-                        if isSelected {
-                            RoundedRectangle(cornerRadius: 22)
-                                .stroke(DesignSystem.monsterPurple.opacity(0.35), lineWidth: 1.5)
-                        }
-                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
-        }
-    }
-
-    private func icon(for source: SnackSource) -> String {
-        switch source {
-        case .books: return "book.closed.fill"
-        case .songs: return "music.note"
-        case .movies: return "film.fill"
-        case .podcasts: return "mic.fill"
         }
     }
 
@@ -230,6 +232,29 @@ struct SnackBarView: View {
             fontStyle: .rounded
         )
     }
+
+    private func quickAddSnack(_ snack: SnackQuote) {
+        guard !addedSnackIDs.contains(snack.id) else { return }
+
+        addSnack(snack)
+
+        // 1) show checkmark
+        withAnimation(.spring(response: 0.25, dampingFraction: 0.9)) {
+            addedSnackIDs.insert(snack.id)
+        }
+
+        // 2) brief pause, then slide out
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.65) {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.92)) {
+                dismissedSnackIDs.insert(snack.id)
+            }
+
+            // 3) cleanup
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                addedSnackIDs.remove(snack.id)
+            }
+        }
+    }
 }
 
 // MARK: - Snack Quote Card
@@ -237,6 +262,7 @@ struct SnackBarView: View {
 struct SnackQuoteCard: View {
     let snack: SnackQuote
     let scheme: ColorScheme
+    let isAdded: Bool
     let onExpand: () -> Void
     let onQuickAdd: () -> Void
 
@@ -256,11 +282,12 @@ struct SnackQuoteCard: View {
                     Spacer()
 
                     Button(action: onQuickAdd) {
-                        Image(systemName: "plus.circle.fill")
+                        Image(systemName: isAdded ? "checkmark.circle.fill" : "plus.circle.fill")
                             .font(.system(size: 22))
-                            .foregroundStyle(DesignSystem.monsterPurple)
+                            .foregroundStyle(isAdded ? .green : DesignSystem.monsterPurple)
+                            .contentTransition(.symbolEffect(.replace))
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.borderless) // ✅ prevents the outer card tap
                 }
             }
             .padding(14)
@@ -281,7 +308,6 @@ struct SnackExpandedView: View {
 
     var body: some View {
         ZStack {
-            // ✅ Dim background (tap to close)
             Color.black.opacity(0.35)
                 .ignoresSafeArea()
                 .onTapGesture { onBack() }

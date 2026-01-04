@@ -30,11 +30,15 @@ struct MasonryQuoteCard: View {
 
             HStack {
                 Spacer()
-                Button(action: onToggleFavorite) {
-                    Image(systemName: quote.isFavorite ? "heart.fill" : "heart")
-                        .font(.system(size: 14, weight: .semibold))
-                }
-                .foregroundStyle(quote.isFavorite ? DesignSystem.monsterPurple : .secondary)
+
+                Image(systemName: quote.isFavorite ? "heart.fill" : "heart")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(quote.isFavorite ? DesignSystem.monsterPurple : .secondary)
+                    .contentShape(Rectangle()) // easier to tap
+                    .onTapGesture {
+                        onToggleFavorite()
+                    }
+                    .accessibilityLabel(quote.isFavorite ? "Unfavorite" : "Favorite")
             }
         }
         .padding(14)
@@ -53,4 +57,3 @@ struct MasonryQuoteCard: View {
         }
     }
 }
-

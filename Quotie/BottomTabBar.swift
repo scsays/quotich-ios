@@ -11,21 +11,20 @@ struct BottomTabBar: View {
     var onAddTapped: () -> Void
     var showsAddButton: Bool = true
 
+    // MARK: - Colors
+
+    private var inactiveColor: Color { .secondary }                // ✅ matches Account gray
+    private var activeColor: Color { DesignSystem.monsterPurple }  // ✅ Memmi purple
+
     var body: some View {
         HStack(spacing: 18) {
 
-            // Search (opens SearchView as a sheet)
+            // Search (sheet)
             Button {
                 onSearchTapped()
             } label: {
-                VStack(spacing: 4) {
-                    Image(systemName: "magnifyingglass")
-                        .font(.system(size: 18, weight: .semibold))
-                    Text("Search")
-                        .font(.caption2)
-                }
-                .frame(maxWidth: .infinity)
-                .foregroundStyle(DesignSystem.monsterPurple)
+                tabLabel(system: "magnifyingglass", title: "Search")
+                    .foregroundStyle(inactiveColor) // ✅ now gray
             }
 
             // Favorites (toggles filter on Home)
@@ -33,14 +32,8 @@ struct BottomTabBar: View {
                 favoritesOnly.toggle()
                 selectedTab = .home
             } label: {
-                VStack(spacing: 4) {
-                    Image(systemName: favoritesOnly ? "heart.fill" : "heart")
-                        .font(.system(size: 18, weight: .semibold))
-                    Text("Favorites")
-                        .font(.caption2)
-                }
-                .frame(maxWidth: .infinity)
-                .foregroundStyle(favoritesOnly ? DesignSystem.monsterPurple : .secondary)
+                tabLabel(system: favoritesOnly ? "heart.fill" : "heart", title: "Favorites")
+                    .foregroundStyle(favoritesOnly ? activeColor : inactiveColor) // ✅ purple only when active
             }
 
             // Add Quote (big +)
@@ -56,24 +49,18 @@ struct BottomTabBar: View {
                         )
                         .foregroundStyle(.white)
                 }
+                .buttonStyle(.plain)
             } else {
-                // keep spacing so layout stays even
                 Spacer()
                     .frame(width: 54, height: 54)
             }
 
-            // Snack Bar (modal destination)
+            // Snack Bar (sheet/modal)
             Button {
                 onSnackTapped()
             } label: {
-                VStack(spacing: 4) {
-                    Image(systemName: "tray")
-                        .font(.system(size: 18, weight: .semibold))
-                    Text("Snack Bar")
-                        .font(.caption2)
-                }
-                .frame(maxWidth: .infinity)
-                .foregroundStyle(DesignSystem.monsterPurple)
+                tabLabel(system: "tray", title: "Snack Bar")
+                    .foregroundStyle(inactiveColor) // ✅ now gray
             }
 
             // Account (tab destination)
@@ -92,18 +79,26 @@ struct BottomTabBar: View {
         )
     }
 
+    // MARK: - Shared label
+
+    private func tabLabel(system: String, title: String) -> some View {
+        VStack(spacing: 4) {
+            Image(systemName: system)
+                .font(.system(size: 18, weight: .semibold))
+            Text(title)
+                .font(.caption2)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    // MARK: - Account tab button
+
     private func tabButton(tab: AppTab, system: String, title: String) -> some View {
         Button {
             selectedTab = tab
         } label: {
-            VStack(spacing: 4) {
-                Image(systemName: system)
-                    .font(.system(size: 18, weight: .semibold))
-                Text(title)
-                    .font(.caption2)
-            }
-            .frame(maxWidth: .infinity)
-            .foregroundStyle(selectedTab == tab ? DesignSystem.monsterPurple : .secondary)
+            tabLabel(system: system, title: title)
+                .foregroundStyle(selectedTab == tab ? activeColor : inactiveColor)
         }
     }
 }

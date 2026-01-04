@@ -276,16 +276,28 @@ private struct EditQuoteSheet: View {
                     }
                     .scrollContentBackground(.hidden)
                     Section {
-                        Button(role: .destructive) {
+                        Button {
                             store.delete(quote)
                             dismiss()
                         } label: {
                             Text("Delete Quote")
                                 .font(.headline)
+                                .foregroundStyle(Color.white)          // ✅ force high contrast
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 14)
                         }
+                        .buttonStyle(.plain)                           // ✅ prevents role/tint styling
+                        .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
                     }
+                    .listRowBackground(
+                        Capsule()
+                            .fill(
+                                scheme == .dark
+                                ? Color.red.opacity(0.80)
+                                : Color.red.opacity(0.88)
+                            )
+                    )
+                    .listRowSeparator(.hidden)
                     .listRowBackground(
                         Capsule()
                             .fill(

@@ -23,6 +23,7 @@ struct RootTabView: View {
                 case .home:
                     HomeFeedView(
                         favoritesOnly: favoritesOnly,
+                        isSearchActive: showingSearch,
                         isScrolling: $isScrolling
                     )
                     .environmentObject(store)

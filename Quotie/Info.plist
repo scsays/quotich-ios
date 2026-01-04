@@ -16,6 +16,8 @@
 			<true/>
 			<key>NSIncludesSubdomains</key>
 			<true/>
+			<key>Memmi_Mood_Endpoint</key>
+			<string>https://memmi-backend-cgm1eudqd-andres-projects-2ab2f211.vercel.app/</string>
 		</dict>
 	</dict>
 </dict>

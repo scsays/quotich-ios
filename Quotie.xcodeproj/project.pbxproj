@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C113190A2F0EB37400085139 /* MemmiDevourLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11319092F0EB36400085139 /* MemmiDevourLog.swift */; };
+		C113190C2F0EB48200085139 /* MemmiMoodService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C113190B2F0EB47D00085139 /* MemmiMoodService.swift */; };
+		C113190D2F106EBE00085139 /* MemmiMoodService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C113190B2F0EB47D00085139 /* MemmiMoodService.swift */; };
 		C12C38662EF626E100301E39 /* SharedConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12C384C2EF626E100301E39 /* SharedConfig.swift */; };
 		C12C38672EF626E100301E39 /* SharedQuoteStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12C384D2EF626E100301E39 /* SharedQuoteStore.swift */; };
 		C12C386A2EF626E100301E39 /* SharedQuoteStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12C384D2EF626E100301E39 /* SharedQuoteStore.swift */; };
@@ -16,6 +19,7 @@
 		C12C38AD2F01F32D00301E39 /* MemmiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12C38AC2F01F32900301E39 /* MemmiService.swift */; };
 		C12C38AF2F01F3D500301E39 /* MemmiBubble.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12C38AE2F01F3D100301E39 /* MemmiBubble.swift */; };
 		C12C38B12F0200DD00301E39 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12C38B02F0200D600301E39 /* AppConfig.swift */; };
+		C153B1E42F1B1B5300C9BF99 /* QuoteReorderDropDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C153B1E32F1B1B4200C9BF99 /* QuoteReorderDropDelegate.swift */; };
 		C1628C442EE6857D003A8FA2 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C16334762ECEAC1300F79895 /* WidgetKit.framework */; };
 		C1628C452EE6857D003A8FA2 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C16334782ECEAC1300F79895 /* SwiftUI.framework */; };
 		C1628C522EE6857E003A8FA2 /* QuoteOfTheDayWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C1628C432EE6857D003A8FA2 /* QuoteOfTheDayWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -51,12 +55,15 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		C11319092F0EB36400085139 /* MemmiDevourLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemmiDevourLog.swift; sourceTree = "<group>"; };
+		C113190B2F0EB47D00085139 /* MemmiMoodService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemmiMoodService.swift; sourceTree = "<group>"; };
 		C12C384C2EF626E100301E39 /* SharedConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedConfig.swift; sourceTree = "<group>"; };
 		C12C384D2EF626E100301E39 /* SharedQuoteStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedQuoteStore.swift; sourceTree = "<group>"; };
 		C12C386D2EF626E100301E39 /* QuoteModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteModel.swift; sourceTree = "<group>"; };
 		C12C38AC2F01F32900301E39 /* MemmiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemmiService.swift; sourceTree = "<group>"; };
 		C12C38AE2F01F3D100301E39 /* MemmiBubble.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemmiBubble.swift; sourceTree = "<group>"; };
 		C12C38B02F0200D600301E39 /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
+		C153B1E32F1B1B4200C9BF99 /* QuoteReorderDropDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteReorderDropDelegate.swift; sourceTree = "<group>"; };
 		C1628C432EE6857D003A8FA2 /* QuoteOfTheDayWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = QuoteOfTheDayWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1628C5C2EE6870B003A8FA2 /* QuoteOfTheDayWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = QuoteOfTheDayWidgetExtension.entitlements; sourceTree = "<group>"; };
 		C16334552ECB91D600F79895 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -154,6 +161,9 @@
 		C1892A292EC6A29100E4C95B = {
 			isa = PBXGroup;
 			children = (
+				C153B1E32F1B1B4200C9BF99 /* QuoteReorderDropDelegate.swift */,
+				C113190B2F0EB47D00085139 /* MemmiMoodService.swift */,
+				C11319092F0EB36400085139 /* MemmiDevourLog.swift */,
 				C18B2A322F09C77700B395FE /* OnboardingFlowView.swift */,
 				C18B2A302F08995800B395FE /* MemmiNotifications.swift */,
 				C17727062F037C96008F84E8 /* SnackQuoteLibrary.swift */,
@@ -293,6 +303,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C113190D2F106EBE00085139 /* MemmiMoodService.swift in Sources */,
 				C12C387E2F01DA7000301E39 /* QuoteModel.swift in Sources */,
 				C12C386A2EF626E100301E39 /* SharedQuoteStore.swift in Sources */,
 				C12C387D2F01DA6800301E39 /* SharedConfig.swift in Sources */,
@@ -304,6 +315,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				C18B2A332F09C77D00B395FE /* OnboardingFlowView.swift in Sources */,
+				C113190C2F0EB48200085139 /* MemmiMoodService.swift in Sources */,
+				C153B1E42F1B1B5300C9BF99 /* QuoteReorderDropDelegate.swift in Sources */,
 				C12C38AF2F01F3D500301E39 /* MemmiBubble.swift in Sources */,
 				C12C38B12F0200DD00301E39 /* AppConfig.swift in Sources */,
 				C18B2A312F08995F00B395FE /* MemmiNotifications.swift in Sources */,
@@ -312,6 +325,7 @@
 				C17727052F037C20008F84E8 /* SnackBarView.swift in Sources */,
 				C12C38662EF626E100301E39 /* SharedConfig.swift in Sources */,
 				C12C38712EF626E100301E39 /* QuoteModel.swift in Sources */,
+				C113190A2F0EB37400085139 /* MemmiDevourLog.swift in Sources */,
 				C12C38672EF626E100301E39 /* SharedQuoteStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -519,12 +533,12 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Quotie/Quotie.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = LV8JT6Z4FF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Quotie/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Quotich;
+				INFOPLIST_KEY_CFBundleDisplayName = Memmi;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Quotie uses your microphone so you can dictate quotes";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Quotie uses speech recognition so you can speak quotes instead of typing them";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -536,7 +550,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.QuotichApp.Quotich;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -556,12 +570,12 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Quotie/Quotie.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_TEAM = LV8JT6Z4FF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Quotie/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Quotich;
+				INFOPLIST_KEY_CFBundleDisplayName = Memmi;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Quotie uses your microphone so you can dictate quotes";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Quotie uses speech recognition so you can speak quotes instead of typing them";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -573,7 +587,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.QuotichApp.Quotich;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

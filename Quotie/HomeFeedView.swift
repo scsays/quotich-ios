@@ -1,22 +1,40 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct HomeFeedView: View {
     @Environment(\.colorScheme) private var scheme
     @EnvironmentObject private var store: QuoteStore
 
     let favoritesOnly: Bool
+    let isSearchActive: Bool
     @Binding var isScrolling: Bool
 
     @State private var scrollY: CGFloat = 0
     @State private var showingMonsterStats = false
-    @State private var selectedQuote: Quote? = nil
+
+    // Drag state (UUID-based)
+    @State private var draggingID: UUID? = nil
+
+    // ✅ Forces the grid to rebuild after a drop (this fixes the “taps stop working” bug)
+    @State private var gridRefreshID = UUID()
+
+    // Sheet item that always re-triggers reliably
+    private struct QuoteSheetItem: Identifiable, Equatable { let id: UUID }
+    @State private var quoteSheetItem: QuoteSheetItem? = nil
 
     // 0 = hero, 1 = collapsed header
     private var collapseT: CGFloat {
-        let start: CGFloat = 10     // when transition starts
-        let end: CGFloat = 140      // when fully collapsed
+        let start: CGFloat = 10
+        let end: CGFloat = 140
         let t = (scrollY - start) / (end - start)
         return min(max(t, 0), 1)
+    }
+
+    // Only allow reordering on the “true” home feed (no filters/search)
+    private var canReorder: Bool { !favoritesOnly && !isSearchActive }
+
+    private var filteredQuotes: [Quote] {
+        favoritesOnly ? store.quotes.filter { $0.isFavorite } : store.quotes
     }
 
     var body: some View {
@@ -34,102 +52,127 @@ struct HomeFeedView: View {
                     spacing: 14
                 ) {
                     ForEach(filteredQuotes) { quote in
-                        MasonryQuoteCard(quote: quote) {
-                            store.toggleFavorite(quote)
-                        }
-                        .contentShape(Rectangle())
-                        .onTapGesture { selectedQuote = quote }
+                        quoteCell(quote)
                     }
                 }
+                .id(gridRefreshID) // ✅ key fix: rebuild the grid when we say so
                 .padding(.horizontal, 16)
-
-                // ✅ Keep your “hero” spacing when at top.
-                // As you collapse, we reduce the top padding so content moves up.
                 .padding(.top, lerp(160, 92, collapseT))
                 .padding(.bottom, 110)
+                .background(catchAllDropTarget) // ✅ drop reset without overlaying touches
             }
             .trackScrollPhase(isScrolling: $isScrolling)
-            .onScrollGeometryChange(for: CGFloat.self) { geo in
-                geo.contentOffset.y
-            } action: { _, newOffset in
+            .onScrollGeometryChange(for: CGFloat.self) { geo in geo.contentOffset.y } action: { _, newOffset in
                 scrollY = newOffset
             }
 
-            // ✅ Overlay the top UI
             topMonsterAndHeader(bg: bg)
         }
         .sheet(isPresented: $showingMonsterStats) {
             MonsterStatsSheet()
                 .environmentObject(store)
         }
-        .sheet(item: $selectedQuote) { quote in
-            QuoteDetailView(quote: quote)
-                .environmentObject(store)
+        .sheet(item: $quoteSheetItem, onDismiss: {
+            quoteSheetItem = nil
+        }) { item in
+            if let q = store.quotes.first(where: { $0.id == item.id }) {
+                QuoteDetailView(quote: q)
+                    .environmentObject(store)
+            } else {
+                EmptyView()
+            }
         }
     }
 
-    private var filteredQuotes: [Quote] {
-        favoritesOnly ? store.quotes.filter { $0.isFavorite } : store.quotes
+    // MARK: - Quote Cell (Tap + Drag/Drop)
+    @ViewBuilder
+    private func quoteCell(_ quote: Quote) -> some View {
+        // ✅ Use a Button for the main tap (more reliable than onTapGesture here)
+        Button {
+            // If a drag is still “logically active”, clear it instead of blocking taps forever
+            if draggingID != nil {
+                draggingID = nil
+                gridRefreshID = UUID()
+            }
+
+            // Present sheet (force retrigger)
+            quoteSheetItem = nil
+            DispatchQueue.main.async {
+                quoteSheetItem = QuoteSheetItem(id: quote.id)
+            }
+        } label: {
+            MasonryQuoteCard(quote: quote) {
+                store.toggleFavorite(quote)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .if(canReorder) { view in
+            view
+                .onDrag {
+                    draggingID = quote.id
+                    return NSItemProvider(object: quote.id.uuidString as NSString)
+                }
+                .onDrop(
+                    of: [UTType.plainText, UTType.text],
+                    delegate: QuoteReorderDropDelegate(
+                        targetID: quote.id,
+                        items: $store.quotes,
+                        draggingID: $draggingID,
+                        onDropEnded: {
+                            // ✅ the other key fix: always rebuild after drop
+                            draggingID = nil
+                            gridRefreshID = UUID()
+                        }
+                    )
+                )
+        }
     }
 
-    // MARK: - Top Overlay (Hero ring -> Header line)
+    // MARK: - Drop “catch-all” (only for clearing stuck drag sessions)
+    private var catchAllDropTarget: some View {
+        Color.clear
+            .contentShape(Rectangle())
+            .onDrop(of: [UTType.plainText, UTType.text], isTargeted: nil) { _ in
+                draggingID = nil
+                gridRefreshID = UUID() // ✅ rebuild restores tap reliability
+                return true
+            }
+    }
+
+    // MARK: - Top Overlay (unchanged)
     private func topMonsterAndHeader(bg: Color) -> some View {
         let t = collapseT
         let heroOpacity = Double(1 - t)
         let headerOpacity = Double(t)
 
-        // ✅ Move the header down (below Dynamic Island) WITHOUT ignoresSafeArea hacks
-        let headerTopPad: CGFloat = 10
-
-        // ✅ Thin-ish header (just enough to hold the meter)
-        let headerHeight: CGFloat = 44
-
-        // ✅ How "see-through" the header is
-        let headerBaseOpacity: Double = scheme == .dark ? 0.92 : 0.88
-
         return ZStack(alignment: .top) {
-
-            // --- HEADER STATE (fades IN as you scroll) ---
             VStack(spacing: 0) {
+                bg.frame(height: 56)
 
-                // 1) SOLID BLACK TOP (status bar safety)
-                // This guarantees the status bar area is NOT transparent.
-                bg
-                    .frame(height: 56) // 👈 adjust 48–64 if you want it higher/lower
-
-                // 2) LOWER HEADER ZONE (mostly solid, with a tiny transparent strip near the bottom)
                 ZStack(alignment: .bottom) {
+                    bg.opacity(scheme == .dark ? 0.98 : 0.94)
 
-                    // Mostly-solid header body
-                    bg
-                        .opacity(scheme == .dark ? 0.98 : 0.94)
-
-                    // Tiny "peek" strip so quotes *slightly* show right above the meter
                     LinearGradient(
-                        colors: [
-                            bg.opacity(1.0),                    // solid above
-                            bg.opacity(scheme == .dark ? 0.78 : 0.72) // slightly transparent right near bottom
-                        ],
+                        colors: [bg.opacity(1.0), bg.opacity(scheme == .dark ? 0.78 : 0.72)],
                         startPoint: .top,
                         endPoint: .bottom
                     )
-                    .frame(height: 18) // 👈 this controls how tall the “peek” strip is
+                    .frame(height: 18)
 
-                    // Hunger meter pinned to the bottom of the header
                     hungerMeterWithMonsterThumb(
                         progress: Double(store.hungerLevel) / 5.0,
                         thumbOpacity: headerOpacity
                     )
-                        .padding(.horizontal, 14)
-                        .padding(.bottom, 8)
+                    .padding(.horizontal, 14)
+                    .padding(.bottom, 8)
                 }
-                .frame(height: 56) // 👈 height of the header area that contains the meter
+                .frame(height: 56)
             }
             .opacity(headerOpacity)
             .animation(.easeOut(duration: 0.18), value: t)
             .ignoresSafeArea(edges: .top)
 
-            // --- HERO STATE (stays the same until you scroll) ---
             VStack(spacing: 0) {
                 MonsterRingAvatar(
                     progress: Double(store.hungerLevel) / 5.0,
@@ -146,42 +189,37 @@ struct HomeFeedView: View {
     }
 
     // MARK: - Helpers
-    private func lerp(_ a: CGFloat, _ b: CGFloat, _ t: CGFloat) -> CGFloat {
-        a + (b - a) * t
-    }
+    private func lerp(_ a: CGFloat, _ b: CGFloat, _ t: CGFloat) -> CGFloat { a + (b - a) * t }
 
-
-    // Thick, glowing hunger meter line + monster thumb at the endpoint
     private func hungerMeterWithMonsterThumb(progress: Double, thumbOpacity: Double) -> some View {
         let clamped = min(max(progress, 0), 1)
 
-        // ✅ One source of truth for sizing
-        let thumbSize: CGFloat = 34     // <-- increase this to 36–40 if you want even beefier
-        let barH: CGFloat = 12          // <-- thicker meter line
+        let baseThumb: CGFloat = 34
+        let barH: CGFloat = 12
+        let baseScale: CGFloat = lerp(1.0, 1.25, CGFloat(clamped))
+        let fullBump: CGFloat = clamped > 0.985 ? 1.10 : 1.0
+        let thumbSize: CGFloat = baseThumb * baseScale * fullBump
+        let endOverlap: CGFloat = clamped > 0.985 ? thumbSize * 0.28 : 0
 
         return GeometryReader { geo in
             let w = geo.size.width
+            let rawFillW: CGFloat = w * CGFloat(clamped) + endOverlap
+            let fillW: CGFloat = min(w, max(barH, rawFillW))
 
-            // Fill width (keep a tiny minimum so you can always see “something”)
-            let fillW = max(barH, w * CGFloat(clamped))
+            let rawThumbX: CGFloat = (w * CGFloat(clamped)) - (thumbSize / 2)
+            let clampedThumbX: CGFloat = min(max(rawThumbX, 0), w - thumbSize)
 
-            // Thumb x-position = true endpoint of progress
-            let thumbCenterX = w * CGFloat(clamped)
-            let thumbX = min(max(thumbCenterX - thumbSize / 2, 0), w - thumbSize)
+            let thumbX: CGFloat = clamped > 0.985
+                ? (w - thumbSize) + (endOverlap * 0.85)
+                : clampedThumbX
 
             ZStack(alignment: .leading) {
-
-                // Track (centered vertically)
                 Capsule()
                     .fill(Color.white.opacity(scheme == .dark ? 0.10 : 0.16))
                     .frame(height: barH)
-                    .overlay(
-                        Capsule()
-                            .stroke(DesignSystem.monsterPurple.opacity(0.35), lineWidth: 1)
-                    )
+                    .overlay(Capsule().stroke(DesignSystem.monsterPurple.opacity(0.35), lineWidth: 1))
                     .position(x: w / 2, y: thumbSize / 2)
 
-                // Fill (centered vertically)
                 Capsule()
                     .fill(DesignSystem.monsterPurple.opacity(0.92))
                     .frame(width: fillW, height: barH)
@@ -189,7 +227,6 @@ struct HomeFeedView: View {
                     .shadow(color: DesignSystem.monsterPurple.opacity(0.25), radius: 18, y: 0)
                     .position(x: fillW / 2, y: thumbSize / 2)
 
-                // Thumb (monster) centered on the bar’s centerline
                 Image("QuoteMonster")
                     .resizable()
                     .scaledToFit()
@@ -199,6 +236,13 @@ struct HomeFeedView: View {
                     .offset(x: thumbX, y: 0)
             }
         }
-        .frame(height: thumbSize) // ✅ makes the thumb “fill” the meter’s vertical space
+        .frame(height: thumbSize)
+    }
+}
+
+// tiny helper for conditional modifiers
+private extension View {
+    @ViewBuilder func `if`<Content: View>(_ condition: Bool, transform: (Self) -> Content) -> some View {
+        if condition { transform(self) } else { self }
     }
 }

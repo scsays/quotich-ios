@@ -65,7 +65,7 @@ struct QuoteMonsterCardView: View {
 
                 // Quote card
                 VStack(spacing: 10) {
-                    Text("Quotie’s Favorite Quote")
+                    Text("Memmi’s Favorite Quote")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(.white.opacity(0.9))
 
