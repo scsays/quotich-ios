@@ -8,11 +8,17 @@ struct QuoteDetailView: View {
     let quote: Quote
     @State private var showingEdit = false
 
-    // MARK: - Memmi State
+    // Memmi
     @State private var memmiMessage: String?
     @State private var isLoadingMemmi = false
     @State private var showMemmiEntrance = false
 
+    // Community Post State
+    @State private var showPostToCommunity = false
+    @State private var isPostingToCommunity = false
+    @State private var didPostToCommunity = false
+    @State private var postError: String? = nil
+    @State private var showPostErrorAlert = false
 
     private var currentQuote: Quote {
         store.quotes.first(where: { $0.id == quote.id }) ?? quote
@@ -35,9 +41,7 @@ struct QuoteDetailView: View {
                 Spacer(minLength: 10)
 
                 bigQuoteCard
-
-                memmiSection   // ⬅️ always outside the card
-
+                memmiSection
                 actionRow
 
                 Spacer(minLength: 18)
@@ -46,9 +50,7 @@ struct QuoteDetailView: View {
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                Button {
-                    dismiss()
-                } label: {
+                Button { dismiss() } label: {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 16, weight: .semibold))
                 }
@@ -57,6 +59,22 @@ struct QuoteDetailView: View {
         .sheet(isPresented: $showingEdit) {
             EditQuoteSheet(quote: currentQuote)
                 .environmentObject(store)
+        }
+        .sheet(isPresented: $showPostToCommunity) {
+            PostToCommunitySheet(
+                quote: currentQuote,
+                scheme: scheme,
+                isPosting: $isPostingToCommunity,
+                onSubmit: { author, source in
+                    Task { await postCurrentQuoteToCommunity(author: author, source: source) }
+                }
+            )
+            .presentationDetents([PresentationDetent.medium, PresentationDetent.large])
+        }
+        .alert("Couldn’t post to Community", isPresented: $showPostErrorAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(postError ?? "Unknown error.")
         }
         .onAppear {
             Task { await loadMemmi() }
@@ -107,24 +125,19 @@ struct QuoteDetailView: View {
             if isLoadingMemmi {
                 MemmiBubble(text: "Memmi is chewing on this one…")
                     .opacity(0.7)
-
             } else if let memmiMessage {
                 MemmiBubble(text: memmiMessage)
                     .scaleEffect(showMemmiEntrance ? 1.05 : 1.0)
                     .shadow(
-                        color: showMemmiEntrance
-                            ? DesignSystem.monsterPurple.opacity(0.4)
-                            : .clear,
+                        color: showMemmiEntrance ? DesignSystem.monsterPurple.opacity(0.4) : .clear,
                         radius: 18
                     )
-                    .animation(.spring(response: 0.4, dampingFraction: 0.75),
-                               value: showMemmiEntrance)
+                    .animation(.spring(response: 0.4, dampingFraction: 0.75), value: showMemmiEntrance)
             }
         }
     }
 
-
-    // MARK: - Actions
+    // MARK: - Action Row
 
     private var actionRow: some View {
         HStack {
@@ -134,9 +147,21 @@ struct QuoteDetailView: View {
 
             Spacer()
 
-            Button {
-                store.toggleFavorite(currentQuote)
-            } label: {
+            Button { showPostToCommunity = true } label: {
+                RoundActionButton(
+                    systemName: didPostToCommunity ? "checkmark.circle.fill" : "person.3.fill",
+                    size: 46,
+                    filled: false
+                )
+                .contentTransition(.symbolEffect(.replace))
+            }
+            .buttonStyle(.plain)
+            .disabled(isPostingToCommunity)
+            .opacity(isPostingToCommunity ? 0.6 : 1.0)
+
+            Spacer()
+
+            Button { store.toggleFavorite(currentQuote) } label: {
                 RoundActionButton(
                     systemName: currentQuote.isFavorite ? "heart.fill" : "heart",
                     size: 58,
@@ -147,9 +172,7 @@ struct QuoteDetailView: View {
 
             Spacer()
 
-            Button {
-                showingEdit = true
-            } label: {
+            Button { showingEdit = true } label: {
                 RoundActionButton(systemName: "pencil", size: 46, filled: false)
             }
             .buttonStyle(.plain)
@@ -157,10 +180,47 @@ struct QuoteDetailView: View {
         .padding(.horizontal, 22)
     }
 
-    // MARK: - Memmi Network Call (FIXED)
+    // MARK: - Post to Community
+
+    private func postCurrentQuoteToCommunity(author: String?, source: String?) async {
+        await MainActor.run {
+            isPostingToCommunity = true
+            postError = nil
+        }
+
+        do {
+            try await CommunityFeedService.shared.submitQuote(
+                text: currentQuote.text,
+                author: author,
+                source: source
+            )
+
+            // ✅ Refresh SnackBarView feed even if not currently on Community
+            NotificationCenter.default.post(name: .communityFeedDidChange, object: nil)
+
+            await MainActor.run {
+                isPostingToCommunity = false
+                showPostToCommunity = false
+                didPostToCommunity = true
+            }
+
+            Task {
+                try? await Task.sleep(nanoseconds: 1_300_000_000)
+                await MainActor.run { didPostToCommunity = false }
+            }
+
+        } catch {
+            await MainActor.run {
+                isPostingToCommunity = false
+                postError = error.localizedDescription
+                showPostErrorAlert = true
+            }
+        }
+    }
+
+    // MARK: - Memmi
 
     private func loadMemmi() async {
-        // 1️⃣ If already cached, use it and bail
         if let cached = currentQuote.memmiReaction {
             memmiMessage = cached
             return
@@ -177,18 +237,12 @@ struct QuoteDetailView: View {
                 showMemmiEntrance = true
             }
 
-            // 2️⃣ Save the reaction back into QuoteStore
-            store.updateMemmiReaction(
-                for: currentQuote.id,
-                reaction: response.memmi
-            )
+            store.updateMemmiReaction(for: currentQuote.id, reaction: response.memmi)
+
             Task {
                 try? await Task.sleep(nanoseconds: 1_500_000_000)
-                await MainActor.run {
-                    showMemmiEntrance = false
-                }
+                await MainActor.run { showMemmiEntrance = false }
             }
-
 
         } catch {
             await MainActor.run {
@@ -207,9 +261,7 @@ struct QuoteDetailView: View {
     }
 }
 
-//
-// MARK: - Supporting Views (kept in-file to avoid scope errors)
-//
+// MARK: - Supporting Views (paste-safe)
 
 private struct RoundActionButton: View {
     @Environment(\.colorScheme) private var scheme
@@ -231,14 +283,75 @@ private struct RoundActionButton: View {
     }
 
     private var backgroundFill: AnyShapeStyle {
-        filled
-        ? AnyShapeStyle(DesignSystem.monsterPurple)
-        : AnyShapeStyle(.ultraThinMaterial)
+        filled ? AnyShapeStyle(DesignSystem.monsterPurple) : AnyShapeStyle(.ultraThinMaterial)
     }
 }
 
-// MARK: - Edit Quote Sheet (restored to fix scope error)
+private struct PostToCommunitySheet: View {
+    let quote: Quote
+    let scheme: ColorScheme
+    @Binding var isPosting: Bool
+    let onSubmit: (_ author: String?, _ source: String?) -> Void
 
+    @Environment(\.dismiss) private var dismiss
+    @State private var author: String = ""
+    @State private var source: String = ""
+
+    var body: some View {
+        let bg = scheme == .dark ? DesignSystem.darkPaper : DesignSystem.lightPaper
+
+        NavigationView {
+            ZStack {
+                bg.ignoresSafeArea()
+
+                Form {
+                    Section("Quote") {
+                        Text("“\(quote.text)”")
+                            .font(.body.weight(.semibold))
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    Section("Optional") {
+                        TextField("Author", text: $author)
+                        TextField("Source (book, speech, etc.)", text: $source)
+                    }
+
+                    Section {
+                        Button {
+                            let a = author.trimmingCharacters(in: .whitespacesAndNewlines)
+                            let s = source.trimmingCharacters(in: .whitespacesAndNewlines)
+                            onSubmit(a.isEmpty ? nil : a, s.isEmpty ? nil : s)
+                        } label: {
+                            HStack {
+                                Spacer()
+                                if isPosting { ProgressView().padding(.trailing, 6) }
+                                Text(isPosting ? "Posting…" : "Post to Community")
+                                    .fontWeight(.semibold)
+                                Spacer()
+                            }
+                        }
+                        .disabled(isPosting)
+                    }
+                }
+                .scrollContentBackground(.hidden)
+            }
+            .navigationTitle("Post to Community")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                        .disabled(isPosting)
+                }
+            }
+            .tint(DesignSystem.monsterPurple)
+            .onAppear {
+                author = quote.author
+                source = quote.source
+            }
+        }
+    }
+}
+
+// ✅ This is what your compiler was missing.
 private struct EditQuoteSheet: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var store: QuoteStore
@@ -253,9 +366,7 @@ private struct EditQuoteSheet: View {
 
     var body: some View {
         NavigationView {
-            let bg = scheme == .dark
-                ? DesignSystem.darkPaper
-                : DesignSystem.lightPaper
+            let bg = scheme == .dark ? DesignSystem.darkPaper : DesignSystem.lightPaper
 
             ZStack {
                 bg.ignoresSafeArea()
@@ -275,6 +386,7 @@ private struct EditQuoteSheet: View {
                         colorPickerGrid
                     }
                     .scrollContentBackground(.hidden)
+
                     Section {
                         Button {
                             store.delete(quote)
@@ -282,31 +394,17 @@ private struct EditQuoteSheet: View {
                         } label: {
                             Text("Delete Quote")
                                 .font(.headline)
-                                .foregroundStyle(Color.white)          // ✅ force high contrast
+                                .foregroundStyle(.white)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 14)
                         }
-                        .buttonStyle(.plain)                           // ✅ prevents role/tint styling
+                        .buttonStyle(.plain)
                         .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
                     }
                     .listRowBackground(
-                        Capsule()
-                            .fill(
-                                scheme == .dark
-                                ? Color.red.opacity(0.80)
-                                : Color.red.opacity(0.88)
-                            )
+                        Capsule().fill(scheme == .dark ? Color.red.opacity(0.75) : Color.red.opacity(0.85))
                     )
                     .listRowSeparator(.hidden)
-                    .listRowBackground(
-                        Capsule()
-                            .fill(
-                                scheme == .dark
-                                ? Color.red.opacity(0.75)
-                                : Color.red.opacity(0.85)
-                            )
-                    )
-
                 }
                 .navigationTitle("Edit Quote")
                 .toolbar {
@@ -324,9 +422,9 @@ private struct EditQuoteSheet: View {
                                 colorStyle: colorStyle,
                                 timesResurfaced: quote.timesResurfaced,
                                 lastResurfacedAt: quote.lastResurfacedAt,
-                                fontStyle: quote.fontStyle
+                                fontStyle: quote.fontStyle,
+                                memmiReaction: quote.memmiReaction
                             )
-
                             store.update(updated)
                             dismiss()
                         }
@@ -341,7 +439,6 @@ private struct EditQuoteSheet: View {
                     colorStyle = quote.colorStyle
                 }
                 .padding(.top, 24)
-
             }
         }
     }
@@ -358,9 +455,7 @@ private struct EditQuoteSheet: View {
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(
-                                style == colorStyle
-                                    ? DesignSystem.monsterPurple
-                                    : Color.white.opacity(0.18),
+                                style == colorStyle ? DesignSystem.monsterPurple : Color.white.opacity(0.18),
                                 lineWidth: style == colorStyle ? 2 : 1
                             )
                     )
@@ -370,4 +465,3 @@ private struct EditQuoteSheet: View {
         .padding(.vertical, 6)
     }
 }
-

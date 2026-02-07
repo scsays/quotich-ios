@@ -12,9 +12,7 @@ struct MonsterStatsSheet: View {
     @State private var isLoadingMemmi = false
     @State private var showMemmiEntrance = false
 
-    private var todayQuote: Quote? {
-        store.quoteFor()
-    }
+    private var todayQuote: Quote? { store.quoteFor() }
 
     private var currentTodayQuote: Quote? {
         guard let q = todayQuote else { return nil }
@@ -23,144 +21,164 @@ struct MonsterStatsSheet: View {
 
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(spacing: 18) {
+            let bg = scheme == .dark ? DesignSystem.darkPaper : DesignSystem.lightPaper
 
-                    MonsterRingAvatar(
-                        progress: Double(store.hungerLevel) / 5.0,
-                        collapseT: 0,
-                        onTap: {}
-                    )
-                    .padding(.top, 8)
+            ZStack {
+                bg.ignoresSafeArea()
 
-                    // Mood (centered)
-                    VStack(spacing: 6) {
-                        Text("Memmi Mood")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                ScrollView {
+                    VStack(spacing: 18) {
 
-                        if moodService.isLoading {
-                            ProgressView()
-                                .scaleEffect(0.9)
-                                .padding(.top, 2)
-                        } else {
-                            Text(moodService.mood)
-                                .font(.system(size: 28, weight: .semibold, design: .rounded))
-                                .multilineTextAlignment(.center)
-                                .frame(maxWidth: .infinity)
+                        // ✅ Back row (matches Snack Bar vibe)
+                        topBackRow
+                            .padding(.top, 10)
+
+                        // ✅ Big centered page title (separate row, never overlaps Back)
+                        Text("Memmi Monster")
+                            .font(.system(size: 36, weight: .heavy, design: .rounded))
+                            .foregroundStyle(DesignSystem.primaryText(scheme))
+                            .multilineTextAlignment(.center)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.85)
+                            .padding(.top, 6)
+
+                        MonsterRingAvatar(
+                            progress: Double(store.hungerLevel) / 5.0,
+                            collapseT: 0,
+                            onTap: {}
+                        )
+                        .padding(.top, 6)
+
+                        // Mood (centered)
+                        VStack(spacing: 6) {
+                            Text("Memmi Mood")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+
+                            if moodService.isLoading {
+                                ProgressView()
+                                    .scaleEffect(0.9)
+                                    .padding(.top, 2)
+                            } else {
+                                Text(moodService.mood)
+                                    .font(.system(size: 28, weight: .semibold, design: .rounded))
+                                    .multilineTextAlignment(.center)
+                                    .frame(maxWidth: .infinity)
+                            }
                         }
-                    }
-                    .padding(.bottom, 8)
+                        .padding(.bottom, 8)
 
-                    // This Week (based on quotes added, not avatar taps)
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("This Week")
-                            .font(.headline)
+                        // This Week
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("This Week")
+                                .font(.headline)
 
-                        HStack(spacing: 14) {
+                            HStack(spacing: 14) {
+                                statPill(
+                                    title: "Quotes Devoured",
+                                    value: String(store.devoursThisWeekCount())
+                                )
+
+                                statPill(
+                                    title: "Top Source",
+                                    value: store.topSourceLast7Days() ?? "—"
+                                )
+                            }
+                        }
+                        .padding(16)
+                        .liquidGlass(cornerRadius: 18, scheme: .light)
+
+                        // All Time
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("All Time")
+                                .font(.headline)
+
                             statPill(
                                 title: "Quotes Devoured",
-                                value: String(store.devoursThisWeekCount())
-                            )
-
-                            statPill(
-                                title: "Top Source",
-                                value: store.topSourceLast7Days() ?? "—"
+                                value: String(store.devoursAllTimeCount())
                             )
                         }
-                    }
-                    .padding(16)
-                    .liquidGlass(cornerRadius: 18, scheme: .light)
+                        .padding(16)
+                        .liquidGlass(cornerRadius: 18, scheme: .light)
 
-                    // All Time
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("All Time")
-                            .font(.headline)
+                        // Favorite quote today + reaction
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Memmi’s Favorite Quote Today")
+                                .font(.headline)
 
-                        statPill(
-                            title: "Quotes Devoured",
-                            value: String(store.devoursAllTimeCount())
-                        )
-                    }
-                    .padding(16)
-                    .liquidGlass(cornerRadius: 18, scheme: .light)
+                            if let q = store.quoteFor() {
 
-                    // Favorite quote today + reaction (Option B: distinct bubbles)
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("Memmi’s Favorite Quote Today")
-                            .font(.headline)
-
-                        if let q = store.quoteFor() {
-
-                            // QUOTE bubble (distinct style)
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Quote")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-
-                                Text("“\(q.text)”")
-                                    .font(.system(.body, design: .serif).italic())
-                                    .foregroundStyle(DesignSystem.primaryText(scheme))
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                            .padding(14)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(
-                                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                    .fill(.ultraThinMaterial)
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                    .stroke(Color.white.opacity(scheme == .dark ? 0.10 : 0.18), lineWidth: 0.8)
-                            )
-
-                            // REACTION bubble (Memmi voice)
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Memmi")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-
-                                let reaction = (q.memmiReaction ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-
-                                if reaction.isEmpty {
-                                    Text("Memmi is chewing on this…")
-                                        .font(.subheadline)
+                                // QUOTE bubble
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("Quote")
+                                        .font(.caption)
                                         .foregroundStyle(.secondary)
-                                } else {
-                                    Text(reaction)
-                                        .font(.subheadline)
+
+                                    Text("“\(q.text)”")
+                                        .font(.system(.body, design: .serif).italic())
                                         .foregroundStyle(DesignSystem.primaryText(scheme))
                                         .fixedSize(horizontal: false, vertical: true)
                                 }
-                            }
-                            .padding(14)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(
-                                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                    .fill(DesignSystem.monsterPurple.opacity(scheme == .dark ? 0.18 : 0.12))
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                    .stroke(DesignSystem.monsterPurple.opacity(scheme == .dark ? 0.35 : 0.25), lineWidth: 0.9)
-                            )
+                                .padding(14)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                        .fill(.ultraThinMaterial)
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                        .stroke(Color.white.opacity(scheme == .dark ? 0.10 : 0.18), lineWidth: 0.8)
+                                )
 
-                        } else {
-                            Text("No quotes yet. Feed me your first one.")
-                                .foregroundStyle(.secondary)
+                                // REACTION bubble (Memmi voice)
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("Memmi")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+
+                                    let reaction = (q.memmiReaction ?? "")
+                                        .trimmingCharacters(in: .whitespacesAndNewlines)
+
+                                    if reaction.isEmpty {
+                                        Text("Memmi is chewing on this…")
+                                            .font(.subheadline)
+                                            .foregroundStyle(.secondary)
+                                    } else {
+                                        Text(reaction)
+                                            .font(.subheadline)
+                                            .foregroundStyle(DesignSystem.primaryText(scheme))
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
+                                }
+                                .padding(14)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                        .fill(DesignSystem.monsterPurple.opacity(scheme == .dark ? 0.18 : 0.12))
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                        .stroke(
+                                            DesignSystem.monsterPurple.opacity(scheme == .dark ? 0.35 : 0.25),
+                                            lineWidth: 0.9
+                                        )
+                                )
+
+                            } else {
+                                Text("No quotes yet. Feed me your first one.")
+                                    .foregroundStyle(.secondary)
+                            }
                         }
+                        .padding(16)
+                        .liquidGlass(cornerRadius: 18, scheme: scheme)
+
+                        Spacer(minLength: 10)
                     }
                     .padding(16)
-                    .liquidGlass(cornerRadius: 18, scheme: scheme)
-                    Spacer(minLength: 10)
-                }
-                .padding(16)
-            }
-            .navigationTitle("Memmi Monster")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Back") { dismiss() }
                 }
             }
+            // ✅ Hide system nav bar so we don’t get duplicate title/back
+            .toolbar(.hidden, for: .navigationBar)
             .onAppear {
                 moodService.loadCachedMoodIfValid()
 
@@ -174,35 +192,36 @@ struct MonsterStatsSheet: View {
         }
     }
 
-    // MARK: - Memmi Reaction UI (mirrors QuoteDetailView feel)
+    // MARK: - Top Back Row (Snack Bar style)
 
-    @ViewBuilder
-    private func memmiReactionView(for quote: Quote) -> some View {
-        if isLoadingMemmi {
-            MemmiBubble(text: "Memmi is chewing on this…")
-                .opacity(0.7)
-                .frame(maxWidth: .infinity, alignment: .center)
+    private var topBackRow: some View {
+        HStack {
+            Button { dismiss() } label: {
+                Text("Back")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(.white) // ✅ avoid blue "tint" look
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 11)
+                    .background(
+                        Capsule()
+                            .fill(DesignSystem.glassMaterial(for: scheme))
+                            .overlay(
+                                Capsule()
+                                    .stroke(Color.white.opacity(scheme == .dark ? 0.14 : 0.20), lineWidth: 0.9)
+                            )
+                    )
+            }
+            .buttonStyle(.plain)
 
-        } else if let memmiMessage {
-            MemmiBubble(text: memmiMessage)
-                .scaleEffect(showMemmiEntrance ? 1.05 : 1.0)
-                .animation(.spring(response: 0.4, dampingFraction: 0.75), value: showMemmiEntrance)
-                .frame(maxWidth: .infinity, alignment: .center)
-
-        } else {
-            // If nothing yet, show the “chewing” placeholder (like QuoteDetailView does)
-            MemmiBubble(text: "Memmi is chewing on this…")
-                .opacity(0.6)
-                .frame(maxWidth: .infinity, alignment: .center)
+            Spacer()
         }
     }
 
-    // MARK: - Memmi Reaction Loader (same caching pattern as QuoteDetailView)
+    // MARK: - Memmi Reaction Loader
 
     private func loadMemmiForTodayQuote() async {
         guard let q = currentTodayQuote else { return }
 
-        // 1) If already cached on the quote, use it and bail
         if let cached = q.memmiReaction, !cached.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             memmiMessage = cached
             return
@@ -219,7 +238,6 @@ struct MonsterStatsSheet: View {
                 showMemmiEntrance = true
             }
 
-            // 2) Save reaction back into QuoteStore (same as QuoteDetailView)
             store.updateMemmiReaction(for: q.id, reaction: response.memmi)
 
             Task {

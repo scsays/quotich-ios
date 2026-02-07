@@ -15,6 +15,12 @@ struct BottomTabBar: View {
 
     private var inactiveColor: Color { .secondary }                // ✅ matches Account gray
     private var activeColor: Color { DesignSystem.monsterPurple }  // ✅ Memmi purple
+    private var snackSymbol: String {
+        // Prefer popcorn if available; fall back gracefully on older iOS.
+        if UIImage(systemName: "popcorn") != nil { return "popcorn" }
+        if UIImage(systemName: "popcorn.fill") != nil { return "popcorn.fill" }
+        return "takeoutbag.and.cup.and.straw"
+    }
 
     var body: some View {
         HStack(spacing: 18) {
@@ -54,13 +60,12 @@ struct BottomTabBar: View {
                 Spacer()
                     .frame(width: 54, height: 54)
             }
-
             // Snack Bar (sheet/modal)
             Button {
                 onSnackTapped()
             } label: {
-                tabLabel(system: "tray", title: "Snack Bar")
-                    .foregroundStyle(inactiveColor) // ✅ now gray
+                tabLabel(system: snackSymbol, title: "Snack Bar")
+                    .foregroundStyle(inactiveColor) // ✅ keep gray
             }
 
             // Account (tab destination)
