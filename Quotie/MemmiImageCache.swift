@@ -15,17 +15,18 @@ enum MemmiImageCache {
 
     /// Returns a background-removed image for the given asset name and color scheme.
     static func image(named name: String, scheme: ColorScheme) -> UIImage? {
-        let key = "\(name)_\(scheme == .dark ? "d" : "l")"
+        // One cached variant per asset — threshold is low enough to preserve
+        // dark ink/text in the banner art while still removing the pure-black background.
+        let key = name
 
         lock.lock()
         if let cached = cache[key] { lock.unlock(); return cached }
         lock.unlock()
 
         guard let original = UIImage(named: name) else { return nil }
-        let processed = original.removingBlackBackground(
-            threshold: scheme == .dark ? 0.15 : 0.22,
-            softEdge:  scheme == .dark          // soft ramp in dark, hard cut in light
-        )
+        // threshold 0.10, soft ramp on edges — works in both light and dark mode
+        // without eating into the dark banner text in the artwork.
+        let processed = original.removingBlackBackground(threshold: 0.10, softEdge: true)
 
         lock.lock()
         cache[key] = processed
