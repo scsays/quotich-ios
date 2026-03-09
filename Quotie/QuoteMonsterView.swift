@@ -11,8 +11,8 @@ enum MonsterMood: String {
         case 0:    return .starving
         case 1:    return .hungry
         case 2:    return .snackish
-        case 3, 4: return .content
-        default:   return .enlightened   // 5 (full) or above
+        case 3:    return .content
+        default:   return .enlightened   // 4 and 5 (near-full and full)
         }
     }
 
@@ -22,7 +22,7 @@ enum MonsterMood: String {
         case ..<0.01: return .starving
         case ..<0.21: return .hungry
         case ..<0.41: return .snackish
-        case ..<0.81: return .content
+        case ..<0.61: return .content
         default:      return .enlightened
         }
     }
@@ -46,16 +46,16 @@ struct QuoteMonsterView: View {
     var size: CGFloat = 64
 
     var body: some View {
-        let uiImage = UIImage(named: mood.assetName) ?? UIImage(named: "QuoteMonster")
+        // MemmiImageCache processes the image once (removes the black background)
+        // and returns the cached transparent version on every subsequent call.
+        let uiImage = MemmiImageCache.image(named: mood.assetName)
+                   ?? UIImage(named: "QuoteMonster")
 
         Group {
             if let uiImage {
                 Image(uiImage: uiImage)
                     .resizable()
                     .scaledToFit()
-                    // .screen blends black pixels into the background, effectively
-                    // making the solid black backdrop invisible on any background colour.
-                    .blendMode(.screen)
             } else {
                 Image(systemName: "face.smiling")
                     .font(.system(size: size * 0.75, weight: .semibold))

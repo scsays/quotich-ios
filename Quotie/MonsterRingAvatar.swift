@@ -47,16 +47,14 @@ struct MonsterRingAvatar: View {
     // MARK: - Memmi
     private var memmiImage: some View {
         let mood = MonsterMood.from(progress: progress)
-        let uiImage = UIImage(named: mood.assetName) ?? UIImage(named: "QuoteMonster")
+        let uiImage = MemmiImageCache.image(named: mood.assetName)
+                   ?? UIImage(named: "QuoteMonster")
 
         return Group {
             if let uiImage {
                 Image(uiImage: uiImage)
                     .resizable()
                     .scaledToFit()
-                    // .screen makes black pixels take on the background colour,
-                    // effectively removing the solid black backdrop.
-                    .blendMode(.screen)
             } else {
                 Image(systemName: "face.smiling.fill")
                     .resizable()
