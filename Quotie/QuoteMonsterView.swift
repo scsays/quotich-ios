@@ -12,7 +12,7 @@ enum MonsterMood: String {
         case 1:    return .hungry
         case 2:    return .snackish
         case 3:    return .content
-        default:   return .enlightened   // 4 and 5 (near-full and full)
+        default:   return .enlightened   // 4 and 5
         }
     }
 
@@ -27,7 +27,6 @@ enum MonsterMood: String {
         }
     }
 
-    /// Asset catalog name for each mood.
     var assetName: String {
         switch self {
         case .starving:    return "memmi_starving"
@@ -37,18 +36,21 @@ enum MonsterMood: String {
         case .enlightened: return "memmi_enlightened"
         }
     }
+
+    /// A user-facing display label.
+    var displayName: String { rawValue.capitalized }
 }
 
 // MARK: - QuoteMonsterView
 
 struct QuoteMonsterView: View {
+    @Environment(\.colorScheme) private var scheme
+
     let mood: MonsterMood
     var size: CGFloat = 64
 
     var body: some View {
-        // MemmiImageCache processes the image once (removes the black background)
-        // and returns the cached transparent version on every subsequent call.
-        let uiImage = MemmiImageCache.image(named: mood.assetName)
+        let uiImage = MemmiImageCache.image(named: mood.assetName, scheme: scheme)
                    ?? UIImage(named: "QuoteMonster")
 
         Group {
@@ -64,6 +66,6 @@ struct QuoteMonsterView: View {
         }
         .frame(width: size, height: size)
         .shadow(color: .black.opacity(0.18), radius: 6, y: 4)
-        .accessibilityLabel("Memmi – \(mood.rawValue)")
+        .accessibilityLabel("Memmi – \(mood.displayName)")
     }
 }

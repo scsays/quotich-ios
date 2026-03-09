@@ -39,15 +39,34 @@ struct QuoteMonsterCardView: View {
                 .padding(.horizontal, 22)
                 .padding(.top, 18)
 
-                QuoteMonsterView(mood: MonsterMood.from(hungerLevel: store.hungerLevel))
-                    .scaleEffect(1.3)
+                let currentMood = MonsterMood.from(hungerLevel: store.hungerLevel)
+
+                QuoteMonsterView(mood: currentMood, size: 150)
                     .padding(.top, 4)
+
+                // Mood name label
+                Text(currentMood.displayName)
+                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 6)
+                    .background(
+                        Capsule()
+                            .fill(.white.opacity(0.18))
+                            .overlay(Capsule().stroke(.white.opacity(0.30), lineWidth: 1))
+                    )
 
                 // Hunger meter card
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("Hunger Meter")
-                        .font(.caption)
-                        .foregroundStyle(.white.opacity(0.9))
+                    HStack {
+                        Text("Hunger Meter")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.white.opacity(0.9))
+                        Spacer()
+                        Text("\(store.hungerLevel) / 5")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.white.opacity(0.75))
+                    }
 
                     ProgressView(value: min(Double(store.hungerLevel) / 5.0, 1.0))
                         .tint(.white)

@@ -10,9 +10,9 @@ struct MonsterRingAvatar: View {
 
     // MARK: - Bigger sizing (this is the main change)
     // Feel free to tweak these 3 numbers if you want even larger/smaller.
-    private var size: CGFloat { lerp(132, 92, collapseT) }      // was 92,66
-    private var ringLine: CGFloat { lerp(10, 8, collapseT) }    // was 8,6
-    private var memmiSize: CGFloat { lerp(78, 58, collapseT) }  // was 56,44
+    private var size: CGFloat { lerp(132, 92, collapseT) }
+    private var ringLine: CGFloat { lerp(10, 8, collapseT) }
+    private var memmiSize: CGFloat { lerp(108, 78, collapseT) }  // larger: ~82% of ring diameter
 
     private var ringOpacity: Double { Double(1 - collapseT) }
 
@@ -47,7 +47,7 @@ struct MonsterRingAvatar: View {
     // MARK: - Memmi
     private var memmiImage: some View {
         let mood = MonsterMood.from(progress: progress)
-        let uiImage = MemmiImageCache.image(named: mood.assetName)
+        let uiImage = MemmiImageCache.image(named: mood.assetName, scheme: scheme)
                    ?? UIImage(named: "QuoteMonster")
 
         return Group {
