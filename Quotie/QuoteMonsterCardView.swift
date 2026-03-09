@@ -39,7 +39,7 @@ struct QuoteMonsterCardView: View {
                 .padding(.horizontal, 22)
                 .padding(.top, 18)
 
-                QuoteMonsterView(mood: .happy)
+                QuoteMonsterView(mood: MonsterMood.from(hungerLevel: store.hungerLevel))
                     .scaleEffect(1.3)
                     .padding(.top, 4)
 

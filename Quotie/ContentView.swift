@@ -117,7 +117,7 @@ struct ContentView: View {
     private var floatingMonster: some View {
         GeometryReader { geo in
             VStack(spacing: 10) {
-                QuoteMonsterView(mood: .neutral)
+                QuoteMonsterView(mood: MonsterMood.from(hungerLevel: store.hungerLevel))
                     .scaleEffect(isDocked ? 0.9 : 1.15)
 
                 if !isDocked {
