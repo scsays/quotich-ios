@@ -144,23 +144,44 @@ struct ContentView: View {
     }
 
     private var hungerMeter: some View {
-        VStack(spacing: 6) {
+        let clamped = min(max(hungerProgress, 0), 1)
+        let mood = MonsterMood.from(hungerLevel: store.hungerLevel)
+
+        return VStack(spacing: 6) {
             Text("Hunger Meter")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
 
             GeometryReader { geo in
+                let barHeight: CGFloat = 10
+                let thumbSize: CGFloat = 34
+                let fillWidth = max(barHeight, geo.size.width * clamped)
+                let thumbX = min(max((geo.size.width * clamped) - thumbSize / 2, 0), geo.size.width - thumbSize)
+
                 ZStack(alignment: .leading) {
                     Capsule()
                         .fill(Color.white.opacity(0.18))
+                        .frame(height: barHeight)
+                        .overlay(Capsule().stroke(DesignSystem.monsterPurple.opacity(0.25), lineWidth: 1))
+                        .position(x: geo.size.width / 2, y: thumbSize / 2)
 
                     Capsule()
-                        .fill(Color.white)
-                        .frame(width: geo.size.width * hungerProgress)
-                        .shadow(radius: 6)
+                        .fill(DesignSystem.monsterPurple.opacity(0.92))
+                        .frame(width: fillWidth, height: barHeight)
+                        .shadow(color: DesignSystem.monsterPurple.opacity(0.35), radius: 8, y: 0)
+                        .position(x: fillWidth / 2, y: thumbSize / 2)
+
+                    if let uiImage = UIImage(named: mood.assetName) ?? UIImage(named: "QuoteMonster") {
+                        Image(uiImage: uiImage)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: thumbSize, height: thumbSize)
+                            .shadow(color: .black.opacity(0.18), radius: 5, y: 2)
+                            .offset(x: thumbX, y: 0)
+                    }
                 }
             }
-            .frame(height: 8)
+            .frame(height: 34)
         }
         .padding(.horizontal)
     }

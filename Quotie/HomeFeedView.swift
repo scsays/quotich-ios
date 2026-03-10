@@ -227,13 +227,16 @@ struct HomeFeedView: View {
                     .shadow(color: DesignSystem.monsterPurple.opacity(0.25), radius: 18, y: 0)
                     .position(x: fillW / 2, y: thumbSize / 2)
 
-                Image("QuoteMonster")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: thumbSize, height: thumbSize)
-                    .shadow(color: .black.opacity(0.25), radius: 6, y: 3)
-                    .opacity(thumbOpacity)
-                    .offset(x: thumbX, y: 0)
+                let mood = MonsterMood.from(progress: clamped)
+                if let uiImage = MemmiImageCache.image(named: mood.assetName, scheme: scheme) ?? UIImage(named: "QuoteMonster") {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: thumbSize, height: thumbSize)
+                        .shadow(color: .black.opacity(0.20), radius: 6, y: 3)
+                        .opacity(thumbOpacity)
+                        .offset(x: thumbX, y: 0)
+                }
             }
         }
         .frame(height: thumbSize)
