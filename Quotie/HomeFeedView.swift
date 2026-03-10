@@ -194,7 +194,7 @@ struct HomeFeedView: View {
     private func hungerMeterWithMonsterThumb(progress: Double, thumbOpacity: Double) -> some View {
         let clamped = min(max(progress, 0), 1)
 
-        let baseThumb: CGFloat = 34
+        let baseThumb: CGFloat = 42
         let barH: CGFloat = 12
         let baseScale: CGFloat = lerp(1.0, 1.25, CGFloat(clamped))
         let fullBump: CGFloat = clamped > 0.985 ? 1.10 : 1.0

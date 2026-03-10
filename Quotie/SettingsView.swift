@@ -81,10 +81,19 @@ struct SettingsView: View {
                         onBack()
                         dismiss()
                     } label: {
-                        HStack(spacing: 6) {
-                            Image(systemName: "chevron.left")
-                            Text("Back")
-                        }
+                        Text("Back")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 18)
+                            .padding(.vertical, 11)
+                            .background(
+                                Capsule()
+                                    .fill(DesignSystem.glassMaterial(for: scheme))
+                                    .overlay(
+                                        Capsule()
+                                            .stroke(Color.white.opacity(scheme == .dark ? 0.14 : 0.20), lineWidth: 0.9)
+                                    )
+                            )
                     }
                 }
             }

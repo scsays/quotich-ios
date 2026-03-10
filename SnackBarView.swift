@@ -392,20 +392,43 @@ struct SnackBarView: View {
                 loadCommunity(force: true)
             }
         } label: {
-            HStack(spacing: 10) {
-                Image(systemName: icon)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(isSelected ? .white : DesignSystem.monsterPurple)
+            ZStack {
+                if src == .community {
+                    HStack(spacing: 10) {
+                        Image(systemName: icon)
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(isSelected ? .white : DesignSystem.monsterPurple)
 
-                Text(src.rawValue)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(isSelected ? .white : DesignSystem.primaryText(scheme))
+                        Text(src.rawValue)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(isSelected ? .white : DesignSystem.primaryText(scheme))
+                    }
+                    .frame(maxWidth: .infinity, alignment: .center)
 
-                Spacer()
+                    if isSelected {
+                        HStack {
+                            Spacer()
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(.white.opacity(0.95))
+                        }
+                    }
+                } else {
+                    HStack(spacing: 10) {
+                        Image(systemName: icon)
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(isSelected ? .white : DesignSystem.monsterPurple)
 
-                if isSelected {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(.white.opacity(0.95))
+                        Text(src.rawValue)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(isSelected ? .white : DesignSystem.primaryText(scheme))
+
+                        Spacer()
+
+                        if isSelected {
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundStyle(.white.opacity(0.95))
+                        }
+                    }
                 }
             }
             .padding(12)
@@ -418,7 +441,12 @@ struct SnackBarView: View {
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .stroke(Color.white.opacity(scheme == .dark ? 0.10 : 0.18), lineWidth: 0.8)
+                    .stroke(
+                        src == .community
+                            ? DesignSystem.monsterPurple.opacity(isSelected ? 0.65 : 0.42)
+                            : Color.white.opacity(scheme == .dark ? 0.10 : 0.18),
+                        lineWidth: src == .community ? 1.2 : 0.8
+                    )
             )
         }
         .buttonStyle(.plain)

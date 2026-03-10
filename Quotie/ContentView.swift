@@ -154,7 +154,7 @@ struct ContentView: View {
 
             GeometryReader { geo in
                 let barHeight: CGFloat = 10
-                let thumbSize: CGFloat = 34
+                let thumbSize: CGFloat = 44
                 let fillWidth = max(barHeight, geo.size.width * clamped)
                 let thumbX = min(max((geo.size.width * clamped) - thumbSize / 2, 0), geo.size.width - thumbSize)
 

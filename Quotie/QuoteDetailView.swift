@@ -162,11 +162,7 @@ struct QuoteDetailView: View {
             Spacer()
 
             Button { store.toggleFavorite(currentQuote) } label: {
-                RoundActionButton(
-                    systemName: currentQuote.isFavorite ? "heart.fill" : "heart",
-                    size: 58,
-                    filled: true
-                )
+                FavoriteActionButton(isFavorite: currentQuote.isFavorite, size: 58)
             }
             .buttonStyle(.plain)
 
@@ -284,6 +280,25 @@ private struct RoundActionButton: View {
 
     private var backgroundFill: AnyShapeStyle {
         filled ? AnyShapeStyle(DesignSystem.monsterPurple) : AnyShapeStyle(.ultraThinMaterial)
+    }
+}
+
+private struct FavoriteActionButton: View {
+    @Environment(\.colorScheme) private var scheme
+
+    let isFavorite: Bool
+    let size: CGFloat
+
+    var body: some View {
+        Image(systemName: isFavorite ? "heart.fill" : "heart")
+            .font(.system(size: 20, weight: .heavy))
+            .foregroundStyle(isFavorite ? DesignSystem.monsterPurple : DesignSystem.primaryText(scheme))
+            .frame(width: size, height: size)
+            .background(Circle().fill(.ultraThinMaterial))
+            .overlay(
+                Circle().stroke(Color.white.opacity(scheme == .dark ? 0.12 : 0.22), lineWidth: 0.8)
+            )
+            .shadow(color: Color.black.opacity(scheme == .dark ? 0.35 : 0.12), radius: 14, y: 8)
     }
 }
 

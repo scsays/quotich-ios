@@ -108,27 +108,12 @@ struct MonsterStatsSheet: View {
 
                             if let q = store.quoteFor() {
 
-                                // QUOTE bubble
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text("Quote")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-
-                                    Text("“\(q.text)”")
-                                        .font(.system(.body, design: .serif).italic())
-                                        .foregroundStyle(DesignSystem.primaryText(scheme))
-                                        .fixedSize(horizontal: false, vertical: true)
-                                }
-                                .padding(14)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                        .fill(.ultraThinMaterial)
+                                QuoteCardView(
+                                    quote: q,
+                                    onToggleFavorite: {},
+                                    isHighlighted: false
                                 )
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                        .stroke(Color.white.opacity(scheme == .dark ? 0.10 : 0.18), lineWidth: 0.8)
-                                )
+                                .allowsHitTesting(false)
 
                                 // REACTION bubble (Memmi voice)
                                 VStack(alignment: .leading, spacing: 8) {
