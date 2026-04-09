@@ -7,6 +7,7 @@ enum AppTab: String {
 
 struct RootTabView: View {
     @StateObject private var store = QuoteStore()
+    @ObservedObject private var notifications = MemmiNotifications.shared
 
     @State private var selectedTab: AppTab = .home
     @State private var showingAddQuote = false
@@ -15,6 +16,9 @@ struct RootTabView: View {
 
     @State private var isScrolling: Bool = false
     @State private var favoritesOnly: Bool = false
+
+    // Deep-link: set when user taps a resurface notification
+    @State private var resurfacedQuote: Quote?
 
     var body: some View {
         ZStack {
@@ -38,7 +42,7 @@ struct RootTabView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        // ✅ Bottom bar ONLY on Home and ONLY when SnackBar is not showing
+        // Bottom bar ONLY on Home and ONLY when SnackBar is not showing
         .safeAreaInset(edge: .bottom) {
             if selectedTab == .home && !showingSnackBar {
                 ZStack {
@@ -71,11 +75,22 @@ struct RootTabView: View {
                 .padding(.horizontal, 16)
             }
         }
-        // ✅ These modifiers must be attached to a real view (not inside safeAreaInset)
         .onAppear {
             store.applyDailyHungerDecay()
             store.updateWidgetQuoteOfTheDay()
-            MemmiNotifications.shared.refreshHungryNudge(hungerLevel: store.hungerLevel)
+
+            // Request notification permission and schedule both channels
+            MemmiNotifications.shared.requestAuthorizationIfNeeded { granted in
+                guard granted else { return }
+                MemmiNotifications.shared.refreshHungryNudge(hungerLevel: store.hungerLevel)
+                store.scheduleResurfaceNotificationIfNeeded()
+            }
+        }
+        // Observe deep-link: when user taps a resurface notification, show the quote
+        .onChange(of: notifications.pendingResurfaceQuoteID) { quoteID in
+            guard let id = quoteID else { return }
+            resurfacedQuote = store.quotes.first(where: { $0.id == id })
+            notifications.pendingResurfaceQuoteID = nil
         }
         .sheet(isPresented: $showingAddQuote) {
             AddQuoteView(store: store)
@@ -87,6 +102,13 @@ struct RootTabView: View {
         .fullScreenCover(isPresented: $showingSnackBar) {
             SnackBarView(onBack: { showingSnackBar = false })
                 .environmentObject(store)
+        }
+        // Resurface sheet — opens automatically when notification is tapped
+        .sheet(item: $resurfacedQuote) { quote in
+            NavigationStack {
+                QuoteDetailView(quote: quote)
+                    .environmentObject(store)
+            }
         }
     }
 }

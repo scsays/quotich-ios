@@ -325,3 +325,49 @@ extension QuoteStore {
     }
 }
 
+// MARK: - Smart Resurface for Notifications
+extension QuoteStore {
+
+    /// Picks the best quote to resurface and schedules tomorrow's 9 AM notification.
+    /// Call this on app launch (onAppear) or after adding a new quote.
+    /// MemmiNotifications will silently skip if already scheduled today.
+    func scheduleResurfaceNotificationIfNeeded() {
+        guard !quotes.isEmpty, let picked = pickResurfaceCandidate() else { return }
+
+        // Mark as resurfaced now so the algorithm doesn't repeat it
+        if let idx = quotes.firstIndex(where: { $0.id == picked.id }) {
+            quotes[idx].timesResurfaced += 1
+            quotes[idx].lastResurfacedAt = Date()
+        }
+
+        MemmiNotifications.shared.scheduleResurfaceNotification(
+            quoteID: picked.id,
+            text: picked.text,
+            author: picked.author
+        )
+    }
+
+    /// Smart quote selection:
+    ///   - 50% chance to draw from favorites pool when favorites exist
+    ///   - Priority 1: quotes never surfaced before
+    ///   - Priority 2: quotes not resurfaced in last 7 days, oldest first
+    ///   - Fallback: least recently resurfaced in pool
+    private func pickResurfaceCandidate() -> Quote? {
+        let favorites = quotes.filter { $0.isFavorite }
+        let pool: [Quote] = (!favorites.isEmpty && Bool.random()) ? favorites : quotes
+
+        // Priority 1: never resurfaced
+        let virgin = pool.filter { $0.lastResurfacedAt == nil }
+        if !virgin.isEmpty { return virgin.randomElement() }
+
+        // Priority 2: stale (not resurfaced in 7+ days)
+        let cutoff = Calendar.current.date(byAdding: .day, value: -7, to: Date()) ?? Date()
+        let stale  = pool
+            .filter  { ($0.lastResurfacedAt ?? .distantPast) < cutoff }
+            .sorted  { ($0.lastResurfacedAt ?? .distantPast) < ($1.lastResurfacedAt ?? .distantPast) }
+        if !stale.isEmpty { return stale.first }
+
+        // Fallback: least recently resurfaced overall
+        return pool.sorted { ($0.lastResurfacedAt ?? .distantPast) < ($1.lastResurfacedAt ?? .distantPast) }.first
+    }
+}
