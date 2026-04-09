@@ -65,6 +65,11 @@ Section("Debug") {
             .font(.system(.footnote, design: .monospaced))
             .foregroundColor(.secondary)
     }
+
+    Button(action: fireTestResurfaceNotification) {
+        Label("Test Resurface Notification (5s)", systemImage: "bell.badge")
+    }
+    .foregroundStyle(DesignSystem.monsterPurple)
 }
 #endif // DEBUG
             }
@@ -82,6 +87,22 @@ Section("Debug") {
                     }
                 }
             }
+        }
+    }
+
+    // MARK: - Debug Actions
+
+    private func fireTestResurfaceNotification() {
+        MemmiNotifications.shared.requestAuthorizationIfNeeded { granted in
+            guard granted else { return }
+            // Pick a random quote from the store as the test payload
+            guard let quote = store.quotes.randomElement() else { return }
+            MemmiNotifications.shared.debugFireResurfaceNotification(
+                quoteID: quote.id,
+                text: quote.text,
+                author: quote.author,
+                inSeconds: 5
+            )
         }
     }
 
