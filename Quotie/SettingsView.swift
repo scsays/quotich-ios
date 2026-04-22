@@ -62,6 +62,14 @@ struct SettingsView: View {
                                 UserDefaults.standard.set(false, forKey: OnboardingKeys.hasSeenOnboarding)
                             }
                             .buttonStyle(.bordered)
+
+#if DEBUG
+                            Button(action: fireTestResurfaceNotification) {
+                                Label("Test Resurface Notification (5s)", systemImage: "bell.badge")
+                            }
+                            .buttonStyle(.bordered)
+                            .tint(DesignSystem.monsterPurple)
+#endif
                         }
 
                         Spacer(minLength: 30)
@@ -129,6 +137,21 @@ struct SettingsView: View {
         }
         .font(.subheadline)
     }
+
+#if DEBUG
+    private func fireTestResurfaceNotification() {
+        MemmiNotifications.shared.requestAuthorizationIfNeeded { granted in
+            guard granted else { return }
+            guard let quote = store.quotes.randomElement() else { return }
+            MemmiNotifications.shared.debugFireResurfaceNotification(
+                quoteID: quote.id,
+                text: quote.text,
+                author: quote.author,
+                inSeconds: 5
+            )
+        }
+    }
+#endif
 
     private var appVersion: String? {
         let info = Bundle.main.infoDictionary
