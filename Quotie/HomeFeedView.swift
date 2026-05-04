@@ -161,7 +161,7 @@ struct HomeFeedView: View {
                     .frame(height: 18)
 
                     hungerMeterWithMonsterThumb(
-                        progress: Double(store.hungerLevel) / 5.0,
+                        progress: MonsterMood.visualProgress(fromHungerLevel: store.hungerLevel),
                         thumbOpacity: headerOpacity
                     )
                     .padding(.horizontal, 14)
@@ -175,7 +175,7 @@ struct HomeFeedView: View {
 
             VStack(spacing: 0) {
                 MonsterRingAvatar(
-                    progress: Double(store.hungerLevel) / 5.0,
+                    progress: MonsterMood.visualProgress(fromHungerLevel: store.hungerLevel),
                     collapseT: collapseT,
                     onTap: { showingMonsterStats = true }
                 )

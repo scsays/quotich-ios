@@ -27,6 +27,13 @@ enum MonsterMood: String {
         }
     }
 
+    /// Visual progress for meters. Enlightened starts at hunger level 4,
+    /// so it should read as full even before the persisted cap of 5.
+    static func visualProgress(fromHungerLevel hungerLevel: Int) -> Double {
+        if from(hungerLevel: hungerLevel) == .enlightened { return 1.0 }
+        return min(max(Double(hungerLevel) / 5.0, 0), 1)
+    }
+
     var assetName: String {
         switch self {
         case .starving:    return "memmi_starving"
@@ -56,6 +63,9 @@ struct QuoteMonsterView: View {
         Group {
             if let uiImage {
                 Image(uiImage: uiImage)
+                    .renderingMode(.original)
+                    .interpolation(.high)
+                    .antialiased(true)
                     .resizable()
                     .scaledToFit()
             } else {
@@ -64,6 +74,7 @@ struct QuoteMonsterView: View {
                     .foregroundStyle(.secondary)
             }
         }
+        .compositingGroup()
         .frame(width: size, height: size)
         .shadow(color: .black.opacity(0.18), radius: 6, y: 4)
         .accessibilityLabel("Memmi – \(mood.displayName)")

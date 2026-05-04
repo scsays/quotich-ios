@@ -140,7 +140,7 @@ struct ContentView: View {
     // MARK: - Hunger Meter
 
     private var hungerProgress: CGFloat {
-        CGFloat(store.hungerLevel) / 5.0
+        CGFloat(MonsterMood.visualProgress(fromHungerLevel: store.hungerLevel))
     }
 
     private var hungerMeter: some View {

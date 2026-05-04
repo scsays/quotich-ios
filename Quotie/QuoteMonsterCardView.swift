@@ -48,7 +48,7 @@ struct QuoteMonsterCardView: View {
                         .font(.caption)
                         .foregroundStyle(.white.opacity(0.9))
 
-                    ProgressView(value: min(Double(store.hungerLevel) / 5.0, 1.0))
+                    ProgressView(value: MonsterMood.visualProgress(fromHungerLevel: store.hungerLevel))
                         .tint(.white)
                 }
                 .padding(16)

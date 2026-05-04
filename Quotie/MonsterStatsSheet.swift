@@ -43,7 +43,7 @@ struct MonsterStatsSheet: View {
                             .padding(.top, 6)
 
                         MonsterRingAvatar(
-                            progress: Double(store.hungerLevel) / 5.0,
+                            progress: MonsterMood.visualProgress(fromHungerLevel: store.hungerLevel),
                             collapseT: 0,
                             onTap: {}
                         )
@@ -184,21 +184,33 @@ struct MonsterStatsSheet: View {
             Button { dismiss() } label: {
                 Text("Back")
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundStyle(.white) // ✅ avoid blue "tint" look
-                    .padding(.horizontal, 18)
-                    .padding(.vertical, 11)
+                    .foregroundColor(scheme == .dark ? .white : .black)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
                     .background(
                         Capsule()
-                            .fill(DesignSystem.glassMaterial(for: scheme))
+                            .fill(scheme == .dark ? Color.black.opacity(0.72) : Color.white)
                             .overlay(
                                 Capsule()
-                                    .stroke(Color.white.opacity(scheme == .dark ? 0.14 : 0.20), lineWidth: 0.9)
+                                    .stroke(
+                                        scheme == .dark ? Color.white.opacity(0.14) : Color.black.opacity(0.08),
+                                        lineWidth: 1
+                                    )
                             )
+                    )
+                    .shadow(
+                        color: Color.black.opacity(scheme == .dark ? 0.22 : 0.10),
+                        radius: 12,
+                        x: 0,
+                        y: 5
                     )
             }
             .buttonStyle(.plain)
 
             Spacer()
+
+            Color.clear
+                .frame(width: 72, height: 1)
         }
     }
 
