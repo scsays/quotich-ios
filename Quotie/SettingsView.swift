@@ -94,14 +94,9 @@ struct SettingsView: View {
                 onBack()
                 dismiss()
             } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 14, weight: .bold))
-
-                    Text("Back")
-                        .font(.system(size: 16, weight: .semibold))
-                }
-                .foregroundColor(scheme == .dark ? .white : .black)
+                Text("Back")
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundColor(scheme == .dark ? .white : .black)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 11)
                 .background(

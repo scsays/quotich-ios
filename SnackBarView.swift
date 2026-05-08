@@ -385,11 +385,13 @@ struct SnackBarView: View {
         let isSelected = (selectedSource == src)
 
         return Button {
+            if src == .community {
+                showAllCommunityQuotes = true
+                return
+            }
+
             withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
                 selectedSource = isSelected ? nil : src
-            }
-            if src == .community && !isSelected {
-                loadCommunity(force: true)
             }
         } label: {
             ZStack {
