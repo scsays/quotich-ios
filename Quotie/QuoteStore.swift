@@ -348,15 +348,12 @@ extension QuoteStore {
         if !recentDevours.isEmpty {
             return topSource(from: recentDevours.map(\.source))
         }
-
-        let recent = quotesAddedInLast7Days()
-        guard !recent.isEmpty else { return nil }
-
-        return topSource(from: recent.map(\.source))
+        return nil
     }
 
     func topSourceAllTime() -> String? {
-        topSource(from: statEvents.map(\.source))
+        guard !devourLog.isEmpty else { return nil }
+        return topSource(from: devourLog.map(\.source))
     }
 
     private func topSource(from sources: [String]) -> String? {
@@ -388,19 +385,35 @@ extension QuoteStore {
     /// Call this on app launch (onAppear) or after adding a new quote.
     /// MemmiNotifications will silently skip if already scheduled today.
     func scheduleResurfaceNotificationIfNeeded() {
-        guard !quotes.isEmpty, let picked = pickResurfaceCandidate() else { return }
+        guard MemmiNotifications.notificationsEnabled else { return }
+        guard !quotes.isEmpty else { return }
+
+        let frequency = MemmiNotifications.favoriteResurfaceFrequencyPerDay
+        let pickedQuotes = pickResurfaceCandidates(count: frequency)
+        guard !pickedQuotes.isEmpty else { return }
 
         // Mark as resurfaced now so the algorithm doesn't repeat it
-        if let idx = quotes.firstIndex(where: { $0.id == picked.id }) {
-            quotes[idx].timesResurfaced += 1
-            quotes[idx].lastResurfacedAt = Date()
+        for picked in pickedQuotes {
+            if let idx = quotes.firstIndex(where: { $0.id == picked.id }) {
+                quotes[idx].timesResurfaced += 1
+                quotes[idx].lastResurfacedAt = Date()
+            }
         }
 
-        MemmiNotifications.shared.scheduleResurfaceNotification(
-            quoteID: picked.id,
-            text: picked.text,
-            author: picked.author
-        )
+        MemmiNotifications.shared.scheduleResurfaceNotifications(pickedQuotes)
+    }
+
+    private func pickResurfaceCandidates(count: Int) -> [Quote] {
+        var selected: [Quote] = []
+        var excluded = Set<UUID>()
+
+        for _ in 0..<max(1, count) {
+            guard let candidate = pickResurfaceCandidate(excluding: excluded) else { break }
+            selected.append(candidate)
+            excluded.insert(candidate.id)
+        }
+
+        return selected
     }
 
     /// Smart quote selection:
@@ -408,9 +421,16 @@ extension QuoteStore {
     ///   - Priority 1: quotes never surfaced before
     ///   - Priority 2: quotes not resurfaced in last 7 days, oldest first
     ///   - Fallback: least recently resurfaced in pool
-    private func pickResurfaceCandidate() -> Quote? {
+    private func pickResurfaceCandidate(excluding excludedIDs: Set<UUID> = []) -> Quote? {
         let favorites = quotes.filter { $0.isFavorite }
-        let pool: [Quote] = (!favorites.isEmpty && Bool.random()) ? favorites : quotes
+        let preferredPool = favorites.isEmpty ? quotes : favorites
+        let pool = preferredPool.filter { !excludedIDs.contains($0.id) }
+
+        if pool.isEmpty, !favorites.isEmpty {
+            return quotes.filter { !excludedIDs.contains($0.id) }
+                .sorted { ($0.lastResurfacedAt ?? .distantPast) < ($1.lastResurfacedAt ?? .distantPast) }
+                .first
+        }
 
         // Priority 1: never resurfaced
         let virgin = pool.filter { $0.lastResurfacedAt == nil }

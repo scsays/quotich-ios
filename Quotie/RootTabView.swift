@@ -79,11 +79,15 @@ struct RootTabView: View {
             store.applyDailyHungerDecay()
             store.updateWidgetQuoteOfTheDay()
 
-            // Request notification permission and schedule both channels
-            MemmiNotifications.shared.requestAuthorizationIfNeeded { granted in
-                guard granted else { return }
-                MemmiNotifications.shared.refreshHungryNudge(hungerLevel: store.hungerLevel)
-                store.scheduleResurfaceNotificationIfNeeded()
+            if MemmiNotifications.notificationsEnabled {
+                // Request notification permission and schedule both channels
+                MemmiNotifications.shared.requestAuthorizationIfNeeded { granted in
+                    guard granted else { return }
+                    MemmiNotifications.shared.refreshHungryNudge(hungerLevel: store.hungerLevel)
+                    store.scheduleResurfaceNotificationIfNeeded()
+                }
+            } else {
+                MemmiNotifications.shared.cancelAllManagedNotifications()
             }
         }
         // Observe deep-link: when user taps a resurface notification, show the quote

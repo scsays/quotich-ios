@@ -11,9 +11,12 @@ final class MemmiNotifications: NSObject, ObservableObject {
     static let shared = MemmiNotifications()
     private override init() { super.init() }
 
+    static let notificationsEnabledKey = "memmi.notifications.enabled"
+    static let favoriteResurfaceFrequencyKey = "memmi.resurface.frequencyPerDay"
+
     // MARK: - Notification IDs
     private let hungryNudgeID   = "memmi.hungry.nudge"
-    private let resurfaceDaily   = "memmi.resurface.daily"
+    private let resurfaceDailyPrefix = "memmi.resurface.daily"
 
     // MARK: - UserDefaults Keys
     private let lastHungryNudgeDateKey      = "memmi.lastNudgeDate"
@@ -45,6 +48,11 @@ final class MemmiNotifications: NSObject, ObservableObject {
     // MARK: - Authorization
 
     func requestAuthorizationIfNeeded(completion: ((Bool) -> Void)? = nil) {
+        guard Self.notificationsEnabled else {
+            completion?(false)
+            return
+        }
+
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             switch settings.authorizationStatus {
             case .authorized, .provisional, .ephemeral:
@@ -67,6 +75,11 @@ final class MemmiNotifications: NSObject, ObservableObject {
 
     /// Call this whenever hunger changes or on app launch.
     func refreshHungryNudge(hungerLevel: Int) {
+        guard Self.notificationsEnabled else {
+            cancelNotification(id: hungryNudgeID)
+            return
+        }
+
         guard hungerLevel <= 3 else {
             cancelNotification(id: hungryNudgeID)
             return
@@ -108,40 +121,71 @@ final class MemmiNotifications: NSObject, ObservableObject {
 
     // MARK: - Smart Resurface
 
-    /// Schedule tomorrow's 9 AM resurface notification with a specific quote.
+    /// Schedule tomorrow's resurface notifications with selected quotes.
     /// Called by QuoteStore after it picks the smartest candidate.
     /// Silently skips if already scheduled today.
-    func scheduleResurfaceNotification(quoteID: UUID, text: String, author: String) {
+    func scheduleResurfaceNotifications(_ quotes: [Quote]) {
+        guard Self.notificationsEnabled else {
+            cancelResurfaceNotifications()
+            return
+        }
+
         guard !didScheduleResurfaceToday() else { return }
+
+        let frequency = Self.favoriteResurfaceFrequencyPerDay
+        let slots = Self.resurfaceScheduleSlots(for: frequency)
+        guard !quotes.isEmpty, !slots.isEmpty else { return }
 
         requestAuthorizationIfNeeded { granted in
             guard granted else { return }
 
-            let content       = UNMutableNotificationContent()
-            content.title     = self.nextResurfaceTitle()
-            let snippet       = text.count > 120 ? String(text.prefix(117)) + "…" : text
-            content.body      = author.trimmingCharacters(in: .whitespaces).isEmpty
-                                    ? "“\(snippet)”"
-                                    : "“\(snippet)” — \(author)"
-            content.sound     = .default
-            content.userInfo  = ["quoteID": quoteID.uuidString, "type": "resurface"]
+            self.cancelResurfaceNotifications()
 
-            // Fire at 9 AM tomorrow
-            let fireDate = self.nextFiringDate(hour: 9, minute: 0, alwaysTomorrow: true)
-            let trigger  = self.calendarTrigger(for: fireDate)
-            let req      = UNNotificationRequest(
-                identifier: self.resurfaceDaily,
-                content: content,
-                trigger: trigger
-            )
+            let scheduledQuotes = zip(slots, quotes)
+            var didScheduleAny = false
 
-            self.cancelNotification(id: self.resurfaceDaily)
-            UNUserNotificationCenter.current().add(req) { error in
-                if error == nil {
-                    UserDefaults.standard.set(Date(), forKey: self.lastResurfaceScheduledKey)
+            for (index, pair) in scheduledQuotes.enumerated() {
+                let (slot, quote) = pair
+                let content       = UNMutableNotificationContent()
+                content.title     = self.nextResurfaceTitle()
+                let snippet       = quote.text.count > 120 ? String(quote.text.prefix(117)) + "…" : quote.text
+                content.body      = quote.author.trimmingCharacters(in: .whitespaces).isEmpty
+                                        ? "“\(snippet)”"
+                                        : "“\(snippet)” — \(quote.author)"
+                content.sound     = .default
+                content.userInfo  = ["quoteID": quote.id.uuidString, "type": "resurface"]
+
+                let fireDate = self.nextFiringDate(hour: slot.hour, minute: slot.minute, alwaysTomorrow: true)
+                let trigger  = self.calendarTrigger(for: fireDate)
+                let req      = UNNotificationRequest(
+                    identifier: "\(self.resurfaceDailyPrefix).\(index)",
+                    content: content,
+                    trigger: trigger
+                )
+
+                UNUserNotificationCenter.current().add(req) { error in
+                    if error == nil {
+                        UserDefaults.standard.set(Date(), forKey: self.lastResurfaceScheduledKey)
+                    }
                 }
+
+                didScheduleAny = true
+            }
+
+            if didScheduleAny {
+                UserDefaults.standard.set(Date(), forKey: self.lastResurfaceScheduledKey)
             }
         }
+    }
+
+    func scheduleResurfaceNotification(quoteID: UUID, text: String, author: String) {
+        let quote = Quote(id: quoteID, text: text, author: author, source: "")
+        scheduleResurfaceNotifications([quote])
+    }
+
+    func cancelAllManagedNotifications() {
+        cancelNotification(id: hungryNudgeID)
+        cancelResurfaceNotifications()
     }
 
     private func didScheduleResurfaceToday() -> Bool {
@@ -182,6 +226,11 @@ final class MemmiNotifications: NSObject, ObservableObject {
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [id])
     }
 
+    private func cancelResurfaceNotifications() {
+        let ids = (0..<3).map { "\(resurfaceDailyPrefix).\($0)" } + ["memmi.resurface.daily"]
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ids)
+    }
+
     /// Returns the next occurrence of hour:minute, either today (if still upcoming) or tomorrow.
     /// Pass `alwaysTomorrow: true` to force tomorrow regardless.
     private func nextFiringDate(hour: Int, minute: Int, alwaysTomorrow: Bool = false) -> Date {
@@ -199,6 +248,29 @@ final class MemmiNotifications: NSObject, ObservableObject {
     private func calendarTrigger(for date: Date) -> UNCalendarNotificationTrigger {
         let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: date)
         return UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+    }
+
+    static var notificationsEnabled: Bool {
+        let defaults = UserDefaults.standard
+        if defaults.object(forKey: notificationsEnabledKey) == nil { return true }
+        return defaults.bool(forKey: notificationsEnabledKey)
+    }
+
+    static var favoriteResurfaceFrequencyPerDay: Int {
+        let stored = UserDefaults.standard.integer(forKey: favoriteResurfaceFrequencyKey)
+        guard stored >= 1 && stored <= 3 else { return 1 }
+        return stored
+    }
+
+    static func resurfaceScheduleSlots(for frequency: Int) -> [(hour: Int, minute: Int)] {
+        switch min(max(frequency, 1), 3) {
+        case 1:
+            return [(9, 0)]
+        case 2:
+            return [(9, 0), (18, 0)]
+        default:
+            return [(9, 0), (14, 0), (20, 0)]
+        }
     }
 
     // MARK: - Debug Helpers
