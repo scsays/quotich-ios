@@ -69,6 +69,20 @@ final class CommunityFeedService {
         NotificationCenter.default.post(name: .communityFeedDidChange, object: nil)
     }
 
+    func verifyQuotePosted(text: String, author: String?, source: String?) async throws -> Bool {
+        let trimmedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedAuthor = (author ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedSource = (source ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+
+        let recent = try await fetchFeed(limit: 50, offset: 0, sort: .new)
+
+        return recent.contains { row in
+            row.text.trimmingCharacters(in: .whitespacesAndNewlines) == trimmedText &&
+            (row.author ?? "").trimmingCharacters(in: .whitespacesAndNewlines) == trimmedAuthor &&
+            (row.source ?? "").trimmingCharacters(in: .whitespacesAndNewlines) == trimmedSource
+        }
+    }
+
     // MARK: - Surprise Me
 
     func fetchRandomQuote() async throws -> CommunityFeedQuote {

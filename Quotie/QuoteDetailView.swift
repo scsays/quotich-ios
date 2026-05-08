@@ -19,6 +19,8 @@ struct QuoteDetailView: View {
     @State private var didPostToCommunity = false
     @State private var postError: String? = nil
     @State private var showPostErrorAlert = false
+    @State private var postSuccessMessage: String? = nil
+    @State private var showPostSuccessAlert = false
 
     private var currentQuote: Quote {
         store.quotes.first(where: { $0.id == quote.id }) ?? quote
@@ -72,7 +74,13 @@ struct QuoteDetailView: View {
                     Task { await postCurrentQuoteToCommunity(author: author, source: source) }
                 }
             )
-            .presentationDetents([PresentationDetent.medium, PresentationDetent.large])
+            .presentationDetents([.large])
+            .presentationDragIndicator(.visible)
+        }
+        .alert("Posted to Community", isPresented: $showPostSuccessAlert) {
+            Button("Nice", role: .cancel) {}
+        } message: {
+            Text(postSuccessMessage ?? "Your quote was posted successfully.")
         }
         .alert("Couldn’t post to Community", isPresented: $showPostErrorAlert) {
             Button("OK", role: .cancel) {}
@@ -188,11 +196,20 @@ struct QuoteDetailView: View {
         }
 
         do {
+            let submittedAuthor = author
+            let submittedSource = source
+
             try await CommunityFeedService.shared.submitQuote(
                 text: currentQuote.text,
-                author: author,
-                source: source
+                author: submittedAuthor,
+                source: submittedSource
             )
+
+            let verified = (try? await CommunityFeedService.shared.verifyQuotePosted(
+                text: currentQuote.text,
+                author: submittedAuthor,
+                source: submittedSource
+            )) ?? false
 
             // ✅ Refresh SnackBarView feed even if not currently on Community
             NotificationCenter.default.post(name: .communityFeedDidChange, object: nil)
@@ -201,6 +218,10 @@ struct QuoteDetailView: View {
                 isPostingToCommunity = false
                 showPostToCommunity = false
                 didPostToCommunity = true
+                postSuccessMessage = verified
+                    ? "Verified — this quote is now visible in the Community feed."
+                    : "The post request succeeded. It may take a moment to appear in Community."
+                showPostSuccessAlert = true
             }
 
             Task {
@@ -322,38 +343,22 @@ private struct PostToCommunitySheet: View {
             ZStack {
                 bg.ignoresSafeArea()
 
-                Form {
-                    Section("Quote") {
-                        Text("“\(quote.text)”")
-                            .font(.body.weight(.semibold))
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 18) {
+                        introCard
+                        quotePreviewCard
+                        detailFields
+                        postButton
 
-                    Section("Optional") {
-                        TextField("Author", text: $author)
-                        TextField("Source (book, speech, etc.)", text: $source)
+                        Spacer(minLength: 28)
                     }
-
-                    Section {
-                        Button {
-                            let a = author.trimmingCharacters(in: .whitespacesAndNewlines)
-                            let s = source.trimmingCharacters(in: .whitespacesAndNewlines)
-                            onSubmit(a.isEmpty ? nil : a, s.isEmpty ? nil : s)
-                        } label: {
-                            HStack {
-                                Spacer()
-                                if isPosting { ProgressView().padding(.trailing, 6) }
-                                Text(isPosting ? "Posting…" : "Post to Community")
-                                    .fontWeight(.semibold)
-                                Spacer()
-                            }
-                        }
-                        .disabled(isPosting)
-                    }
+                    .padding(.horizontal, 18)
+                    .padding(.top, 18)
+                    .padding(.bottom, 32)
                 }
-                .scrollContentBackground(.hidden)
             }
             .navigationTitle("Post to Community")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
@@ -366,6 +371,139 @@ private struct PostToCommunitySheet: View {
                 author = quote.author
                 source = quote.source
             }
+        }
+    }
+
+    private var introCard: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "person.3.fill")
+                .font(.system(size: 22, weight: .bold))
+                .foregroundStyle(DesignSystem.monsterPurple)
+                .frame(width: 42, height: 42)
+                .background(Circle().fill(DesignSystem.monsterPurple.opacity(0.18)))
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Share this with the Community")
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(DesignSystem.primaryText(scheme))
+                Text("Review the card and details before posting.")
+                    .font(.subheadline)
+                    .foregroundStyle(DesignSystem.secondaryText(scheme))
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .liquidGlass(cornerRadius: 22, scheme: scheme)
+    }
+
+    private var quotePreviewCard: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("“\(quote.text)”")
+                .font(.system(.title2, design: fontDesign(for: quote.fontStyle)).weight(.semibold))
+                .foregroundStyle(DesignSystem.primaryText(scheme))
+                .fixedSize(horizontal: false, vertical: true)
+
+            VStack(alignment: .leading, spacing: 4) {
+                if !author.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    Text("— \(author.trimmingCharacters(in: .whitespacesAndNewlines))")
+                        .font(.headline)
+                        .foregroundStyle(DesignSystem.secondaryText(scheme))
+                }
+
+                if !source.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    Text(source.trimmingCharacters(in: .whitespacesAndNewlines))
+                        .font(.subheadline)
+                        .foregroundStyle(DesignSystem.secondaryText(scheme).opacity(0.9))
+                }
+            }
+        }
+        .padding(22)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .fill(DesignSystem.cardGradient(for: quote.colorStyle, scheme: scheme))
+                .shadow(color: DesignSystem.cardShadow, radius: 22, y: 10)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .stroke(Color.white.opacity(scheme == .dark ? 0.12 : 0.18), lineWidth: 0.8)
+        )
+    }
+
+    private var detailFields: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Community Details")
+                .font(.headline.weight(.bold))
+                .foregroundStyle(DesignSystem.primaryText(scheme))
+
+            VStack(spacing: 12) {
+                communityTextField(title: "Author", placeholder: "Who said it?", text: $author)
+                communityTextField(title: "Source", placeholder: "Book, speech, song, etc.", text: $source)
+            }
+        }
+        .padding(16)
+        .liquidGlass(cornerRadius: 22, scheme: scheme)
+    }
+
+    private func communityTextField(title: String, placeholder: String, text: Binding<String>) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(.secondary)
+                .textCase(.uppercase)
+
+            TextField(placeholder, text: text)
+                .font(.body.weight(.medium))
+                .padding(.horizontal, 14)
+                .padding(.vertical, 13)
+                .background(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(scheme == .dark ? Color.white.opacity(0.10) : Color.white.opacity(0.68))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(scheme == .dark ? Color.white.opacity(0.12) : Color.black.opacity(0.06), lineWidth: 1)
+                )
+        }
+    }
+
+    private var postButton: some View {
+        Button {
+            let a = author.trimmingCharacters(in: .whitespacesAndNewlines)
+            let s = source.trimmingCharacters(in: .whitespacesAndNewlines)
+            onSubmit(a.isEmpty ? nil : a, s.isEmpty ? nil : s)
+        } label: {
+            HStack(spacing: 10) {
+                Spacer()
+                if isPosting {
+                    ProgressView()
+                        .tint(.white)
+                } else {
+                    Image(systemName: "paperplane.fill")
+                        .font(.system(size: 17, weight: .bold))
+                }
+                Text(isPosting ? "Posting and verifying…" : "Post to Community")
+                    .font(.headline.weight(.bold))
+                Spacer()
+            }
+            .foregroundStyle(.white)
+            .padding(.vertical, 16)
+            .background(
+                Capsule(style: .continuous)
+                    .fill(DesignSystem.monsterPurple)
+                    .shadow(color: DesignSystem.monsterPurple.opacity(scheme == .dark ? 0.38 : 0.22), radius: 16, y: 8)
+            )
+        }
+        .buttonStyle(.plain)
+        .disabled(isPosting)
+        .opacity(isPosting ? 0.75 : 1.0)
+    }
+
+    private func fontDesign(for style: FontStyle) -> Font.Design {
+        switch style {
+        case .standard: return .default
+        case .serif: return .serif
+        case .rounded: return .rounded
         }
     }
 }
