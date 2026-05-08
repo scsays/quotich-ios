@@ -97,11 +97,13 @@ struct SearchView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Back") { dismiss() }
+                        .fontWeight(.semibold)
                 }
                 ToolbarItem(placement: .principal) {
                     Text("Search").font(.headline)
                 }
             }
+            .tint(DesignSystem.monsterPurple)
             .sheet(item: $selectedQuote) { quote in
                 QuoteDetailView(quote: quote)
                     .environmentObject(store)

@@ -157,9 +157,9 @@ struct MonsterStatsSheet: View {
     }
 
     private var moodCard: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: 8) {
             Text("Current Mood")
-                .font(.caption.weight(.semibold))
+                .font(.subheadline.weight(.bold))
                 .foregroundStyle(.secondary)
 
             if moodService.isLoading {
@@ -168,7 +168,7 @@ struct MonsterStatsSheet: View {
                     .padding(.top, 2)
             } else {
                 Text(moodService.mood)
-                    .font(.system(size: 26, weight: .bold, design: .rounded))
+                    .font(.system(size: 34, weight: .heavy, design: .rounded))
                     .foregroundStyle(DesignSystem.primaryText(scheme))
                     .multilineTextAlignment(.center)
                     .frame(maxWidth: .infinity)
@@ -179,7 +179,7 @@ struct MonsterStatsSheet: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
         }
-        .padding(14)
+        .padding(16)
         .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 18, style: .continuous)
@@ -295,16 +295,16 @@ struct MonsterStatsSheet: View {
             Button { dismiss() } label: {
                 Text("Back")
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(scheme == .dark ? .white : .black)
+                    .foregroundColor(.white)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 12)
                     .background(
                         Capsule()
-                            .fill(scheme == .dark ? Color.black.opacity(0.72) : Color.white)
+                            .fill(DesignSystem.monsterPurple)
                             .overlay(
                                 Capsule()
                                     .stroke(
-                                        scheme == .dark ? Color.white.opacity(0.14) : Color.black.opacity(0.08),
+                                        Color.white.opacity(0.18),
                                         lineWidth: 1
                                     )
                             )
@@ -389,7 +389,7 @@ struct MonsterStatsSheet: View {
             return "Feed Memmi a quote this week to shape their mood."
         }
 
-        return "Based on the tone of quotes fed in the last 7 days. Fullness still drives the avatar."
+        return "Based on the tone of quotes fed in the last 7 days."
     }
 
     // MARK: - Memmi Reaction Loader

@@ -197,7 +197,7 @@ struct SettingsView: View {
             } label: {
                 Text("Back")
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(scheme == .dark ? .white : .black)
+                    .foregroundColor(.white)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 11)
                     .background(backButtonBackground)
@@ -289,11 +289,11 @@ struct SettingsView: View {
 
     private var backButtonBackground: some View {
         Capsule()
-            .fill(scheme == .dark ? Color.black.opacity(0.86) : Color.white.opacity(0.96))
+            .fill(DesignSystem.monsterPurple)
             .overlay(
                 Capsule()
                     .stroke(
-                        scheme == .dark ? Color.white.opacity(0.22) : Color.black.opacity(0.10),
+                        Color.white.opacity(0.18),
                         lineWidth: 1
                     )
             )

@@ -10,6 +10,9 @@ struct MemmiBubble: View {
                 .frame(width: 48, height: 48)
 
             Text(text)
+                .font(.system(.body, design: .rounded, weight: .medium))
+                .lineSpacing(3)
+                .foregroundStyle(.primary)
                 .padding(12)
                 .background(
                     RoundedRectangle(cornerRadius: 16)
@@ -20,4 +23,3 @@ struct MemmiBubble: View {
         .transition(.opacity)
     }
 }
-

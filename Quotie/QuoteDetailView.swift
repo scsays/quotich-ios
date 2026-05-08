@@ -42,11 +42,13 @@ struct QuoteDetailView: View {
 
                 bigQuoteCard
                 memmiSection
+                Spacer(minLength: 8)
                 actionRow
 
-                Spacer(minLength: 18)
+                Spacer(minLength: 4)
             }
             .padding(.horizontal, 18)
+            .padding(.bottom, 18)
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
@@ -54,6 +56,7 @@ struct QuoteDetailView: View {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 16, weight: .semibold))
                 }
+                .tint(DesignSystem.monsterPurple)
             }
         }
         .sheet(isPresented: $showingEdit) {
@@ -142,7 +145,7 @@ struct QuoteDetailView: View {
     private var actionRow: some View {
         HStack {
             ShareLink(item: shareText) {
-                RoundActionButton(systemName: "square.and.arrow.up", size: 46, filled: false)
+                RoundActionButton(systemName: "square.and.arrow.up", size: 58, filled: false)
             }
 
             Spacer()
@@ -150,7 +153,7 @@ struct QuoteDetailView: View {
             Button { showPostToCommunity = true } label: {
                 RoundActionButton(
                     systemName: didPostToCommunity ? "checkmark.circle.fill" : "person.3.fill",
-                    size: 46,
+                    size: 58,
                     filled: false
                 )
                 .contentTransition(.symbolEffect(.replace))
@@ -169,7 +172,7 @@ struct QuoteDetailView: View {
             Spacer()
 
             Button { showingEdit = true } label: {
-                RoundActionButton(systemName: "pencil", size: 46, filled: false)
+                RoundActionButton(systemName: "pencil", size: 58, filled: false)
             }
             .buttonStyle(.plain)
         }
@@ -354,6 +357,7 @@ private struct PostToCommunitySheet: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
+                        .fontWeight(.semibold)
                         .disabled(isPosting)
                 }
             }
@@ -425,6 +429,7 @@ private struct EditQuoteSheet: View {
                 .toolbar {
                     ToolbarItem(placement: .navigationBarLeading) {
                         Button("Cancel") { dismiss() }
+                            .fontWeight(.semibold)
                     }
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button("Save") {
@@ -438,7 +443,8 @@ private struct EditQuoteSheet: View {
                                 timesResurfaced: quote.timesResurfaced,
                                 lastResurfacedAt: quote.lastResurfacedAt,
                                 fontStyle: quote.fontStyle,
-                                memmiReaction: quote.memmiReaction
+                                memmiReaction: quote.memmiReaction,
+                                createdAt: quote.createdAt
                             )
                             store.update(updated)
                             dismiss()

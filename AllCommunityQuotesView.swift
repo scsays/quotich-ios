@@ -82,6 +82,7 @@ struct AllCommunityQuotesView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button("Back") { dismiss() }
+                    .fontWeight(.semibold)
             }
             ToolbarItem(placement: .principal) {
                 Text("Community").font(.headline)
@@ -95,6 +96,7 @@ struct AllCommunityQuotesView: View {
                 .accessibilityLabel("Submit Quote")
             }
         }
+        .tint(DesignSystem.monsterPurple)
         .sheet(item: $selectedQuote) { quote in
             CommunityQuoteDetailSheet(
                 quote: quote,

@@ -170,11 +170,13 @@ struct SnackBarView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Back") { onBack() }
+                        .fontWeight(.semibold)
                 }
                 ToolbarItem(placement: .principal) {
                     Text("Snack Bar").font(.headline)
                 }
             }
+            .tint(DesignSystem.monsterPurple)
 
             // ✅ Push to All Community Quotes screen
             .navigationDestination(isPresented: $showAllCommunityQuotes) {
@@ -663,9 +665,11 @@ struct SnackExpandedView: View {
 
                 HStack(spacing: 14) {
                     Button("Back", action: onBack)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background((scheme == .dark ? Color.white : Color.black).opacity(0.10))
+                        .background(DesignSystem.monsterPurple)
                         .cornerRadius(14)
 
                     Button(action: onAdd) {

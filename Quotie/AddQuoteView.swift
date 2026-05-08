@@ -144,6 +144,7 @@ struct AddQuoteView: View {
                         stopListeningIfNeeded()
                         dismiss()
                     }
+                    .fontWeight(.semibold)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
@@ -157,6 +158,7 @@ struct AddQuoteView: View {
                         )
                         dismiss()
                     }
+                    .fontWeight(.semibold)
                     .disabled(text.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }

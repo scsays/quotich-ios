@@ -49,6 +49,8 @@ struct OnboardingFlowView: View {
                             withAnimation(.easeOut(duration: 0.2)) { step -= 1 }
                         }
                         .buttonStyle(.bordered)
+                        .fontWeight(.semibold)
+                        .tint(DesignSystem.monsterPurple)
                     }
                     
                     Spacer()
