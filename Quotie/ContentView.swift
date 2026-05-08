@@ -210,10 +210,11 @@ struct ContentView: View {
         let base = showFavoritesOnly
             ? store.quotes.filter { $0.isFavorite }
             : store.quotes
+        let newestFirst = base.sorted { $0.createdAt > $1.createdAt }
 
-        guard !searchText.isEmpty else { return base }
+        guard !searchText.isEmpty else { return newestFirst }
 
-        return base.filter {
+        return newestFirst.filter {
             $0.text.localizedCaseInsensitiveContains(searchText)
         }
     }

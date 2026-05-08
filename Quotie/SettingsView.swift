@@ -22,6 +22,9 @@ struct SettingsView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
 
+                        topBackRow
+                            .padding(.top, 10)
+
                         sectionCard(title: "About Memmi") {
                             Text("Memmi is your little quote vault — a place to capture the lines you fall in love with and resurface them later when you need them most.")
                                 .foregroundStyle(DesignSystem.primaryText(scheme))
@@ -79,36 +82,60 @@ struct SettingsView: View {
                     .padding(.bottom, 28)
                 }
             }
-            .buttonStyle(.bordered)
-            .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        // Works even if sheet dismissal is acting weird
-                        onBack()
-                        dismiss()
-                    } label: {
-                        Text("Back")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 18)
-                            .padding(.vertical, 11)
-                            .background(
-                                Capsule()
-                                    .fill(DesignSystem.glassMaterial(for: scheme))
-                                    .overlay(
-                                        Capsule()
-                                            .stroke(Color.white.opacity(scheme == .dark ? 0.14 : 0.20), lineWidth: 0.9)
-                                    )
-                            )
-                    }
-                }
-            }
+            .toolbar(.hidden, for: .navigationBar)
         }
     }
 
     // MARK: - Helpers
+
+    private var topBackRow: some View {
+        HStack {
+            Button {
+                onBack()
+                dismiss()
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 14, weight: .bold))
+
+                    Text("Back")
+                        .font(.system(size: 16, weight: .semibold))
+                }
+                .foregroundColor(scheme == .dark ? .white : .black)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 11)
+                .background(
+                    Capsule()
+                        .fill(scheme == .dark ? Color.black.opacity(0.86) : Color.white.opacity(0.96))
+                        .overlay(
+                            Capsule()
+                                .stroke(
+                                    scheme == .dark ? Color.white.opacity(0.22) : Color.black.opacity(0.10),
+                                    lineWidth: 1
+                                )
+                        )
+                )
+                .shadow(
+                    color: Color.black.opacity(scheme == .dark ? 0.30 : 0.12),
+                    radius: 12,
+                    x: 0,
+                    y: 5
+                )
+            }
+            .buttonStyle(.plain)
+
+            Spacer()
+
+            Text("Settings")
+                .font(.headline)
+                .foregroundStyle(DesignSystem.primaryText(scheme))
+
+            Spacer()
+
+            Color.clear
+                .frame(width: 72, height: 1)
+        }
+    }
 
     private func sectionCard<Content: View>(title: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 12) {

@@ -31,10 +31,11 @@ struct HomeFeedView: View {
     }
 
     // Only allow reordering on the “true” home feed (no filters/search)
-    private var canReorder: Bool { !favoritesOnly && !isSearchActive }
+    private var canReorder: Bool { false }
 
     private var filteredQuotes: [Quote] {
-        favoritesOnly ? store.quotes.filter { $0.isFavorite } : store.quotes
+        let base = favoritesOnly ? store.quotes.filter { $0.isFavorite } : store.quotes
+        return base.sorted { $0.createdAt > $1.createdAt }
     }
 
     var body: some View {
