@@ -47,7 +47,7 @@ struct AllCommunityQuotesView: View {
     @State private var addedCommunityIDs: Set<UUID> = []
 
     private var displayedQuotes: [CommunityFeedQuote] {
-        var base = quotes
+        var base = quotes.filter { !$0.isForgeQATestQuote }
 
         if filter == .liked {
             base = base.filter { likedCommunityQuoteIDs.contains($0.id.uuidString) }
@@ -133,17 +133,12 @@ struct AllCommunityQuotesView: View {
 
     private var header: some View {
         VStack(spacing: 6) {
-            Text("Explore community quotes")
-                .font(.title3.weight(.bold))
+            Text("Memmi Community Quotes")
+                .font(.title2.weight(.bold))
                 .foregroundStyle(DesignSystem.primaryText(scheme))
-
-            Text("Search by theme, author, or source. Save favorites to find them again, or add them back to your own feed.")
-                .font(.callout)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 20)
         }
         .frame(maxWidth: .infinity)
+        .padding(.top, 4)
     }
 
     private var searchBar: some View {
@@ -151,7 +146,7 @@ struct AllCommunityQuotesView: View {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(.secondary)
 
-            TextField("Search themes, authors, sources…", text: $searchText)
+            TextField("Search quotes, authors, sources…", text: $searchText)
                 .textInputAutocapitalization(.never)
                 .disableAutocorrection(true)
 
@@ -279,7 +274,7 @@ struct AllCommunityQuotesView: View {
             )
             .onTapGesture { selectedQuote = quote }
 
-            HStack(spacing: 12) {
+            HStack(spacing: 10) {
                 Button { toggleLike(for: quote) } label: {
                     Label(
                         "\(quote.favoritesCount + (likedCommunityQuoteIDs.contains(quote.id.uuidString) && !quote.isFavorited ? 1 : 0))",
@@ -296,19 +291,11 @@ struct AllCommunityQuotesView: View {
                 .tint(DesignSystem.monsterPurple)
                 .disabled(addedCommunityIDs.contains(quote.id))
 
-                Spacer()
-
-                if let source = quote.source, !source.isEmpty {
-                    Text(source)
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                }
+                Spacer(minLength: 0)
             }
             .font(.subheadline.weight(.semibold))
         }
-        .padding(12)
-        .liquidGlass(cornerRadius: 24, scheme: scheme)
+        .padding(.bottom, 4)
     }
 
     private func load(reset: Bool) {

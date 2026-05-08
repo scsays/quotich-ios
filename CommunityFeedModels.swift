@@ -23,6 +23,10 @@ struct CommunityFeedQuote: Identifiable, Decodable, Equatable {
     }
 }
 extension CommunityFeedQuote {
+    var isForgeQATestQuote: Bool {
+        author == "Forge test" || text.hasPrefix("TEST QUOTE — community feed cross-device check")
+    }
+
     func asLocalQuote() -> Quote {
         Quote(
             id: id,
@@ -30,7 +34,7 @@ extension CommunityFeedQuote {
             author: author ?? "",
             source: source ?? "",
             isFavorite: isFavorited,
-            colorStyle: .mint,
+            colorStyle: .lilac,
             timesResurfaced: 0,
             lastResurfacedAt: nil,
             fontStyle: .rounded
