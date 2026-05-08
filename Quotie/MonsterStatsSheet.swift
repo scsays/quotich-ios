@@ -385,18 +385,11 @@ struct MonsterStatsSheet: View {
     }
 
     private var moodCaption: String {
-        switch store.devoursThisWeekCount() {
-        case 0:
-            return "Add a quote this week to wake Memmi up."
-        case 1:
-            return "A small snack, but Memmi noticed."
-        case 2...3:
-            return "A steady little feast is forming."
-        case 4...6:
-            return "Memmi has been eating well this week."
-        default:
-            return "A very full Memmi. Excellent chaos."
+        if store.devoursThisWeekCount() == 0 {
+            return "Feed Memmi a quote this week to shape their mood."
         }
+
+        return "Based on the tone of quotes fed in the last 7 days. Fullness still drives the avatar."
     }
 
     // MARK: - Memmi Reaction Loader

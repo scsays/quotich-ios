@@ -4,14 +4,14 @@ import Combine
 @MainActor
 final class MemmiMoodService: ObservableObject {
 
-    @Published private(set) var mood: String = "Curiously Content"
+    @Published private(set) var mood: String = "Quietly Reflective"
     @Published private(set) var isLoading: Bool = false
 
-    // Cache so you don’t re-generate mood constantly
-    private let cacheKey = "memmi.mood.cache.v1"
-    private let cacheDateKey = "memmi.mood.cacheDate.v1"
+    // Cache so you don’t re-generate mood constantly.
+    // v2 intentionally resets the old count-based cache.
+    private let cacheKey = "memmi.mood.cache.v2"
+    private let cacheDateKey = "memmi.mood.cacheDate.v2"
 
-    // Info.plist key you’ll add in the next step
     private let endpointPlistKey = "MEMMI_MOOD_ENDPOINT"
 
     struct MoodResponse: Codable {
@@ -32,8 +32,11 @@ final class MemmiMoodService: ObservableObject {
     }
 
     func refreshMood(using weeklyQuotes: [String]) async {
+        let localMood = localMood(forWeeklyQuotes: weeklyQuotes)
+        mood = localMood
+
         guard !weeklyQuotes.isEmpty else {
-            mood = "Quietly Hungry"
+            cache(localMood)
             return
         }
 
@@ -43,22 +46,20 @@ final class MemmiMoodService: ObservableObject {
         do {
             let newMood = try await fetchMoodFromYourBackend(weeklyQuotes: weeklyQuotes)
             mood = newMood
-
-            let defaults = UserDefaults.standard
-            defaults.set(newMood, forKey: cacheKey)
-            defaults.set(Date(), forKey: cacheDateKey)
+            cache(newMood)
         } catch {
-            // Fail soft with a local mood so the card still feels alive when
-            // the backend endpoint is not configured or reachable.
-            let fallbackMood = localMood(forWeeklyQuoteCount: weeklyQuotes.count)
-            mood = fallbackMood
-
-            let defaults = UserDefaults.standard
-            defaults.set(fallbackMood, forKey: cacheKey)
-            defaults.set(Date(), forKey: cacheDateKey)
-
+            // Fail soft with the content-based local classifier so the card
+            // still reflects what Memmi has been fed, even without backend mood generation.
+            mood = localMood
+            cache(localMood)
             print("Mood generation fell back locally: \(error)")
         }
+    }
+
+    private func cache(_ mood: String) {
+        let defaults = UserDefaults.standard
+        defaults.set(mood, forKey: cacheKey)
+        defaults.set(Date(), forKey: cacheDateKey)
     }
 
     private func fetchMoodFromYourBackend(weeklyQuotes: [String]) async throws -> String {
@@ -84,14 +85,10 @@ final class MemmiMoodService: ObservableObject {
         // Force “two words” lightly (backend already tries)
         let parts = raw.split(separator: " ").prefix(2)
         let twoWord = parts.joined(separator: " ")
-        return twoWord.isEmpty ? "Mysteriously Vibing" : twoWord
+        return twoWord.isEmpty ? "Quietly Reflective" : twoWord
     }
 
     private func moodEndpointURL() -> URL? {
-        // Reads from Info.plist:
-        // MEMMI_MOOD_ENDPOINT = "https://your-domain.vercel.app/api/memmi-mood"
-        // or for local dev:
-        // MEMMI_MOOD_ENDPOINT = "http://192.168.1.123:3000/api/memmi-mood"
         let plistValue = Bundle.main.object(forInfoDictionaryKey: endpointPlistKey) as? String
         let trimmed = (plistValue ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -109,18 +106,106 @@ final class MemmiMoodService: ObservableObject {
 #endif
     }
 
-    private func localMood(forWeeklyQuoteCount count: Int) -> String {
-        switch count {
-        case 0:
+    private func localMood(forWeeklyQuotes quotes: [String]) -> String {
+        let combined = quotes
+            .joined(separator: " ")
+            .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
+            .lowercased()
+
+        guard !combined.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             return "Quietly Hungry"
-        case 1:
-            return "Thoughtfully Nibbling"
-        case 2...3:
-            return "Curiously Fed"
-        case 4...6:
-            return "Happily Devouring"
-        default:
-            return "Wildly Inspired"
         }
+
+        let scoredThemes: [(theme: MoodTheme, score: Int)] = MoodTheme.allCases.map { theme in
+            (theme, theme.score(in: combined))
+        }
+
+        if let winner = scoredThemes
+            .filter({ $0.score > 0 })
+            .sorted(by: { lhs, rhs in
+                if lhs.score == rhs.score { return lhs.theme.priority < rhs.theme.priority }
+                return lhs.score > rhs.score
+            })
+            .first {
+            return winner.theme.moodName
+        }
+
+        return "Quietly Reflective"
+    }
+}
+
+private enum MoodTheme: CaseIterable {
+    case introspective
+    case motivational
+    case melancholic
+    case considerate
+    case grateful
+    case romantic
+    case resilient
+    case calm
+    case curious
+
+    var moodName: String {
+        switch self {
+        case .introspective: return "Deeply Reflective"
+        case .motivational:  return "Brightly Driven"
+        case .melancholic:   return "Softly Melancholy"
+        case .considerate:   return "Tenderly Considerate"
+        case .grateful:      return "Warmly Grateful"
+        case .romantic:      return "Lovingly Open"
+        case .resilient:     return "Quietly Brave"
+        case .calm:          return "Calmly Grounded"
+        case .curious:       return "Curiously Searching"
+        }
+    }
+
+    var priority: Int {
+        switch self {
+        case .melancholic:   return 0
+        case .introspective: return 1
+        case .resilient:     return 2
+        case .considerate:   return 3
+        case .motivational:  return 4
+        case .romantic:      return 5
+        case .grateful:      return 6
+        case .calm:          return 7
+        case .curious:       return 8
+        }
+    }
+
+    private var keywords: [String] {
+        switch self {
+        case .introspective:
+            return ["meaning", "truth", "self", "soul", "become", "becoming", "remember", "memory", "inside", "within", "understand", "attention", "story", "identity", "question", "reflection", "aware", "awareness"]
+        case .motivational:
+            return ["begin", "start", "rise", "go", "keep", "try", "courage", "brave", "build", "create", "change", "possible", "power", "win", "grow", "growth", "dream", "forward", "better", "strong"]
+        case .melancholic:
+            return ["grief", "loss", "sad", "sorrow", "hurt", "wound", "broken", "pain", "alone", "lonely", "dark", "ache", "cry", "tears", "missing", "empty", "heavy", "end", "goodbye"]
+        case .considerate:
+            return ["kind", "kindness", "gentle", "soft", "care", "compassion", "mercy", "listen", "understand", "forgive", "forgiveness", "human", "tender", "help", "hold", "space", "together"]
+        case .grateful:
+            return ["gratitude", "grateful", "thanks", "thankful", "blessing", "blessings", "gift", "enough", "abundance", "joy", "beautiful", "wonder", "appreciate", "appreciation"]
+        case .romantic:
+            return ["love", "lover", "heart", "beloved", "kiss", "desire", "devotion", "romance", "together", "intimacy", "adore", "affection", "passion"]
+        case .resilient:
+            return ["survive", "surviving", "endure", "heal", "healing", "recover", "stronger", "resilient", "still", "again", "through", "overcome", "scar", "carry"]
+        case .calm:
+            return ["peace", "peaceful", "stillness", "still", "breathe", "breath", "rest", "quiet", "slow", "present", "presence", "ease", "ground", "grounded", "patience"]
+        case .curious:
+            return ["why", "wonder", "curious", "mystery", "seek", "search", "learn", "discover", "question", "open", "unknown", "explore"]
+        }
+    }
+
+    func score(in text: String) -> Int {
+        keywords.reduce(0) { partial, keyword in
+            partial + occurrences(of: keyword, in: text)
+        }
+    }
+
+    private func occurrences(of keyword: String, in text: String) -> Int {
+        let pattern = "\\b" + NSRegularExpression.escapedPattern(for: keyword) + "\\b"
+        guard let regex = try? NSRegularExpression(pattern: pattern) else { return 0 }
+        let range = NSRange(text.startIndex..<text.endIndex, in: text)
+        return regex.numberOfMatches(in: text, range: range)
     }
 }
