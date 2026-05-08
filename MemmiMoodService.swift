@@ -48,8 +48,16 @@ final class MemmiMoodService: ObservableObject {
             defaults.set(newMood, forKey: cacheKey)
             defaults.set(Date(), forKey: cacheDateKey)
         } catch {
-            // Fail soft — keep last mood
-            print("Mood generation failed: \(error)")
+            // Fail soft with a local mood so the card still feels alive when
+            // the backend endpoint is not configured or reachable.
+            let fallbackMood = localMood(forWeeklyQuoteCount: weeklyQuotes.count)
+            mood = fallbackMood
+
+            let defaults = UserDefaults.standard
+            defaults.set(fallbackMood, forKey: cacheKey)
+            defaults.set(Date(), forKey: cacheDateKey)
+
+            print("Mood generation fell back locally: \(error)")
         }
     }
 
@@ -88,10 +96,31 @@ final class MemmiMoodService: ObservableObject {
         let trimmed = (plistValue ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmed.isEmpty else {
-            // Fallback: keeps you from crashing if you forget the plist key
-            return URL(string: "https://YOUR_DOMAIN_HERE/api/memmi-mood")
+            return nil
         }
 
-        return URL(string: trimmed)
+        guard let url = URL(string: trimmed) else { return nil }
+
+#if DEBUG
+        return url
+#else
+        guard url.scheme?.lowercased() == "https" else { return nil }
+        return url
+#endif
+    }
+
+    private func localMood(forWeeklyQuoteCount count: Int) -> String {
+        switch count {
+        case 0:
+            return "Quietly Hungry"
+        case 1:
+            return "Thoughtfully Nibbling"
+        case 2...3:
+            return "Curiously Fed"
+        case 4...6:
+            return "Happily Devouring"
+        default:
+            return "Wildly Inspired"
+        }
     }
 }

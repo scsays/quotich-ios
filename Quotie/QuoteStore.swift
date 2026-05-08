@@ -158,7 +158,11 @@ final class QuoteStore: ObservableObject {
             source: source,
             isFavorite: old.isFavorite,
             colorStyle: old.colorStyle,
-            fontStyle: old.fontStyle
+            timesResurfaced: old.timesResurfaced,
+            lastResurfacedAt: old.lastResurfacedAt,
+            fontStyle: old.fontStyle,
+            memmiReaction: old.memmiReaction,
+            createdAt: old.createdAt
         )
 
         quotes[idx] = updated
@@ -295,26 +299,78 @@ extension QuoteStore {
         return quotes.filter { $0.createdAt >= cutoff }
     }
 
+    private func devoursInLast7Days(from now: Date = Date()) -> [DevourEvent] {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -7, to: now) ?? now
+        return devourLog.filter { $0.date >= cutoff }
+    }
+
+    private var statEvents: [DevourEvent] {
+        guard !devourLog.isEmpty else {
+            return quotes.map { quote in
+                DevourEvent(
+                    quoteID: quote.id,
+                    source: quote.source.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Unknown" : quote.source,
+                    date: quote.createdAt
+                )
+            }
+        }
+
+        return devourLog
+    }
+
     func devoursThisWeekCount() -> Int {
-        quotesAddedInLast7Days().count
+        let recentDevours = devoursInLast7Days()
+        return recentDevours.isEmpty ? quotesAddedInLast7Days().count : recentDevours.count
     }
 
     func devoursAllTimeCount() -> Int {
         quotes.count
     }
 
+    func favoriteQuotesCount() -> Int {
+        quotes.filter(\.isFavorite).count
+    }
+
+    func mostDevoursInAWeekCount() -> Int {
+        let calendar = Calendar.current
+        let events = statEvents.filter { $0.date != .distantPast }
+        guard !events.isEmpty else { return quotes.count }
+
+        let grouped = Dictionary(grouping: events) { event in
+            calendar.dateInterval(of: .weekOfYear, for: event.date)?.start ?? event.date
+        }
+
+        return grouped.values.map(\.count).max() ?? 0
+    }
+
     func topSourceLast7Days() -> String? {
+        let recentDevours = devoursInLast7Days()
+        if !recentDevours.isEmpty {
+            return topSource(from: recentDevours.map(\.source))
+        }
+
         let recent = quotesAddedInLast7Days()
         guard !recent.isEmpty else { return nil }
 
+        return topSource(from: recent.map(\.source))
+    }
+
+    func topSourceAllTime() -> String? {
+        topSource(from: statEvents.map(\.source))
+    }
+
+    private func topSource(from sources: [String]) -> String? {
         var counts: [String: Int] = [:]
-        for q in recent {
-            let trimmed = q.source.trimmingCharacters(in: .whitespacesAndNewlines)
+        for source in sources {
+            let trimmed = source.trimmingCharacters(in: .whitespacesAndNewlines)
             let key = trimmed.isEmpty ? "Unknown" : trimmed
             counts[key, default: 0] += 1
         }
 
-        return counts.max(by: { $0.value < $1.value })?.key
+        return counts.sorted { lhs, rhs in
+            if lhs.value == rhs.value { return lhs.key.localizedCaseInsensitiveCompare(rhs.key) == .orderedAscending }
+            return lhs.value > rhs.value
+        }.first?.key
     }
 
     /// Quotes added in the last 7 days (used for mood generation)
