@@ -13,10 +13,7 @@ struct MonsterRingAvatar: View {
     private var size: CGFloat { lerp(152, 102, collapseT) }
     private var ringLine: CGFloat { lerp(11, 8, collapseT) }
     private var memmiSize: CGFloat { lerp(108, 76, collapseT) }
-    private var memmiYOffset: CGFloat { lerp(8, 4, collapseT) }
-    private var badgeTopPadding: CGFloat {
-        ((size - memmiSize) / 2) + memmiYOffset + (memmiSize * 0.035)
-    }
+    private var badgeTopPadding: CGFloat { lerp(5, 4, collapseT) }
 
     private var ringOpacity: Double { Double(1 - collapseT) }
 
@@ -36,7 +33,6 @@ struct MonsterRingAvatar: View {
                 }
 
                 memmiImage
-                    .offset(y: memmiYOffset)
 
                 moodBadge
             }
