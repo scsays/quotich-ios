@@ -8,11 +8,13 @@ struct MonsterRingAvatar: View {
     let collapseT: CGFloat        // 0 = expanded, 1 = collapsed
     let onTap: () -> Void
 
-    // MARK: - Bigger sizing (this is the main change)
-    // Feel free to tweak these 3 numbers if you want even larger/smaller.
-    private var size: CGFloat { lerp(132, 92, collapseT) }
-    private var ringLine: CGFloat { lerp(10, 8, collapseT) }
-    private var memmiSize: CGFloat { lerp(108, 78, collapseT) }  // larger: ~82% of ring diameter
+    // MARK: - Sizing
+    // Keep Memmi crisp while giving the state badge more breathing room above the art.
+    private var size: CGFloat { lerp(152, 102, collapseT) }
+    private var ringLine: CGFloat { lerp(11, 8, collapseT) }
+    private var memmiSize: CGFloat { lerp(108, 76, collapseT) }
+    private var memmiYOffset: CGFloat { lerp(8, 4, collapseT) }
+    private var badgeTopPadding: CGFloat { lerp(10, 7, collapseT) }
 
     private var ringOpacity: Double { Double(1 - collapseT) }
 
@@ -32,6 +34,9 @@ struct MonsterRingAvatar: View {
                 }
 
                 memmiImage
+                    .offset(y: memmiYOffset)
+
+                moodBadge
             }
             .frame(width: size, height: size)
             .contentShape(Circle())
@@ -58,12 +63,6 @@ struct MonsterRingAvatar: View {
                     .antialiased(true)
                     .resizable()
                     .scaledToFit()
-                    .overlay(alignment: .top) {
-                        if mood == .hungry && collapseT < 0.85 {
-                            HungryStatusBadge(size: memmiSize, scheme: scheme)
-                                .padding(.top, memmiSize * 0.03)
-                        }
-                    }
             } else {
                 Image(systemName: "face.smiling.fill")
                     .resizable()
@@ -85,6 +84,21 @@ struct MonsterRingAvatar: View {
             color: isFull ? DesignSystem.monsterPurple.opacity(scheme == .dark ? 0.22 : 0.14) : .clear,
             radius: 18, x: 0, y: 0
         )
+    }
+
+    private var moodBadge: some View {
+        let mood = MonsterMood.from(progress: progress)
+
+        return VStack {
+            if collapseT < 0.85 {
+                MonsterMoodStatusBadge(mood: mood, size: size, scheme: scheme)
+                    .padding(.top, badgeTopPadding)
+            }
+
+            Spacer(minLength: 0)
+        }
+        .frame(width: size, height: size)
+        .allowsHitTesting(false)
     }
 
     // MARK: - Glow Halo

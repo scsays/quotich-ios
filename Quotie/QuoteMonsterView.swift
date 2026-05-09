@@ -48,21 +48,22 @@ enum MonsterMood: String {
     var displayName: String { rawValue.capitalized }
 }
 
-// MARK: - Hungry Status Badge
+// MARK: - Monster Mood Status Badge
 
-struct HungryStatusBadge: View {
+struct MonsterMoodStatusBadge: View {
+    let mood: MonsterMood
     let size: CGFloat
     let scheme: ColorScheme
 
     var body: some View {
-        Text("Hungry")
-            .font(.system(size: max(11, size * 0.13), weight: .black, design: .rounded))
-            .kerning(0.3)
+        Text(mood.displayName)
+            .font(.system(size: max(10, size * 0.105), weight: .black, design: .rounded))
+            .kerning(0.25)
             .foregroundStyle(scheme == .dark ? Color(red: 0.13, green: 0.08, blue: 0.05) : Color(red: 0.10, green: 0.06, blue: 0.04))
             .lineLimit(1)
-            .minimumScaleFactor(0.75)
-            .padding(.horizontal, max(7, size * 0.075))
-            .padding(.vertical, max(3, size * 0.03))
+            .minimumScaleFactor(0.68)
+            .padding(.horizontal, max(8, size * 0.07))
+            .padding(.vertical, max(3, size * 0.025))
             .background(
                 Capsule(style: .continuous)
                     .fill(Color(red: 1.0, green: 0.91, blue: 0.74).opacity(scheme == .dark ? 0.96 : 0.98))
@@ -98,9 +99,9 @@ struct QuoteMonsterView: View {
                     .resizable()
                     .scaledToFit()
                     .overlay(alignment: .top) {
-                        if mood == .hungry && size >= 96 {
-                            HungryStatusBadge(size: size, scheme: scheme)
-                                .padding(.top, size * 0.03)
+                        if size >= 96 {
+                            MonsterMoodStatusBadge(mood: mood, size: size, scheme: scheme)
+                                .padding(.top, size * 0.025)
                         }
                     }
             } else {
