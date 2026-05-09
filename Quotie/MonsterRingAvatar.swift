@@ -53,8 +53,17 @@ struct MonsterRingAvatar: View {
         return Group {
             if let uiImage {
                 Image(uiImage: uiImage)
+                    .renderingMode(.original)
+                    .interpolation(.high)
+                    .antialiased(true)
                     .resizable()
                     .scaledToFit()
+                    .overlay(alignment: .top) {
+                        if mood == .hungry && collapseT < 0.85 {
+                            HungryStatusBadge(size: memmiSize, scheme: scheme)
+                                .padding(.top, memmiSize * 0.03)
+                        }
+                    }
             } else {
                 Image(systemName: "face.smiling.fill")
                     .resizable()
@@ -67,7 +76,7 @@ struct MonsterRingAvatar: View {
             }
         }
         .frame(width: memmiSize, height: memmiSize)
-        // ⛔️ Removed clipShape(Circle()) because it can make the avatar *feel* smaller/cropped.
+        .compositingGroup()
         .shadow(
             color: Color.black.opacity(scheme == .dark ? 0.25 : 0.10),
             radius: 10, x: 0, y: 6

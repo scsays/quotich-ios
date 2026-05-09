@@ -48,6 +48,35 @@ enum MonsterMood: String {
     var displayName: String { rawValue.capitalized }
 }
 
+// MARK: - Hungry Status Badge
+
+struct HungryStatusBadge: View {
+    let size: CGFloat
+    let scheme: ColorScheme
+
+    var body: some View {
+        Text("Hungry")
+            .font(.system(size: max(11, size * 0.13), weight: .black, design: .rounded))
+            .kerning(0.3)
+            .foregroundStyle(scheme == .dark ? Color(red: 0.13, green: 0.08, blue: 0.05) : Color(red: 0.10, green: 0.06, blue: 0.04))
+            .lineLimit(1)
+            .minimumScaleFactor(0.75)
+            .padding(.horizontal, max(7, size * 0.075))
+            .padding(.vertical, max(3, size * 0.03))
+            .background(
+                Capsule(style: .continuous)
+                    .fill(Color(red: 1.0, green: 0.91, blue: 0.74).opacity(scheme == .dark ? 0.96 : 0.98))
+                    .overlay(
+                        Capsule(style: .continuous)
+                            .stroke(Color(red: 0.27, green: 0.14, blue: 0.08).opacity(0.28), lineWidth: 1)
+                    )
+            )
+            .shadow(color: Color.white.opacity(scheme == .dark ? 0.18 : 0.75), radius: 1.2, x: 0, y: 0.8)
+            .shadow(color: Color.black.opacity(scheme == .dark ? 0.20 : 0.10), radius: 2.5, x: 0, y: 1.2)
+            .accessibilityHidden(true)
+    }
+}
+
 // MARK: - QuoteMonsterView
 
 struct QuoteMonsterView: View {
@@ -68,6 +97,12 @@ struct QuoteMonsterView: View {
                     .antialiased(true)
                     .resizable()
                     .scaledToFit()
+                    .overlay(alignment: .top) {
+                        if mood == .hungry && size >= 96 {
+                            HungryStatusBadge(size: size, scheme: scheme)
+                                .padding(.top, size * 0.03)
+                        }
+                    }
             } else {
                 Image(systemName: "face.smiling")
                     .font(.system(size: size * 0.75, weight: .semibold))

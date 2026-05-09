@@ -15,6 +15,7 @@ struct SettingsView: View {
 
     @AppStorage(MemmiNotifications.notificationsEnabledKey) private var notificationsEnabled: Bool = true
     @AppStorage(MemmiNotifications.favoriteResurfaceFrequencyKey) private var resurfaceFrequency: Int = 1
+    @AppStorage(AppAppearance.storageKey) private var appAppearanceRawValue: String = AppAppearance.system.rawValue
 
     @State private var notificationPermissionStatus: UNAuthorizationStatus = .notDetermined
 
@@ -33,6 +34,8 @@ struct SettingsView: View {
                             .padding(.top, 10)
 
                         heroCard
+
+                        appearanceCard
 
                         notificationCard
 
@@ -126,6 +129,28 @@ struct SettingsView: View {
         .background(heroBackground)
         .overlay(heroStroke)
         .shadow(color: Color.black.opacity(scheme == .dark ? 0.32 : 0.12), radius: 18, x: 0, y: 10)
+    }
+
+    private var appearanceCard: some View {
+        sectionCard(title: "Appearance", systemImage: "circle.lefthalf.filled") {
+            VStack(alignment: .leading, spacing: 12) {
+                Picker("App appearance", selection: $appAppearanceRawValue) {
+                    ForEach(AppAppearance.allCases) { appearance in
+                        Label(appearance.title, systemImage: appearance.systemImage)
+                            .tag(appearance.rawValue)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .tint(DesignSystem.monsterPurple)
+
+                if let selected = AppAppearance(rawValue: appAppearanceRawValue) {
+                    Text(selected.subtitle)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
     }
 
     private var notificationCard: some View {

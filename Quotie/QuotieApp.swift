@@ -6,9 +6,14 @@ struct QuotieApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     @StateObject private var auth = AuthManager.shared
+    @AppStorage(AppAppearance.storageKey) private var appAppearanceRawValue: String = AppAppearance.system.rawValue
 
     @State private var hasSeenOnboarding: Bool =
         UserDefaults.standard.bool(forKey: OnboardingKeys.hasSeenOnboarding)
+
+    private var appAppearance: AppAppearance {
+        AppAppearance(rawValue: appAppearanceRawValue) ?? .system
+    }
 
     var body: some Scene {
         WindowGroup {
@@ -23,6 +28,7 @@ struct QuotieApp: App {
                 }
             }
             .environmentObject(auth)
+            .preferredColorScheme(appAppearance.colorScheme)
             .task {
                 await auth.start()
             }

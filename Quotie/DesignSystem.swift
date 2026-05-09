@@ -1,5 +1,49 @@
 import SwiftUI
 
+// MARK: - App Appearance
+
+enum AppAppearance: String, CaseIterable, Identifiable {
+    case system
+    case light
+    case dark
+
+    static let storageKey = "memmi.appAppearance"
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .system: return "System"
+        case .light: return "Light"
+        case .dark: return "Dark"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .system: return "Follow your iPhone setting."
+        case .light: return "Keep Memmi bright."
+        case .dark: return "Keep Memmi cozy."
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .system: return "iphone"
+        case .light: return "sun.max.fill"
+        case .dark: return "moon.fill"
+        }
+    }
+
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system: return nil
+        case .light: return .light
+        case .dark: return .dark
+        }
+    }
+}
+
 // MARK: - Design System
 // This file centralizes ALL visual language:
 // glass, glow, elevation, color, and text behavior.
