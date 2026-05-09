@@ -62,8 +62,8 @@ struct MonsterMoodStatusBadge: View {
             .foregroundStyle(scheme == .dark ? Color(red: 0.13, green: 0.08, blue: 0.05) : Color(red: 0.10, green: 0.06, blue: 0.04))
             .lineLimit(1)
             .minimumScaleFactor(0.68)
-            .padding(.horizontal, max(8, size * 0.07))
-            .padding(.vertical, max(3, size * 0.025))
+            .padding(.horizontal, max(10, size * 0.085))
+            .padding(.vertical, max(4, size * 0.03))
             .background(
                 Capsule(style: .continuous)
                     .fill(Color(red: 1.0, green: 0.91, blue: 0.74).opacity(scheme == .dark ? 0.96 : 0.98))
@@ -101,7 +101,7 @@ struct QuoteMonsterView: View {
                     .overlay(alignment: .top) {
                         if size >= 96 {
                             MonsterMoodStatusBadge(mood: mood, size: size, scheme: scheme)
-                                .padding(.top, size * 0.025)
+                                .padding(.top, size * 0.035)
                         }
                     }
             } else {

@@ -14,7 +14,9 @@ struct MonsterRingAvatar: View {
     private var ringLine: CGFloat { lerp(11, 8, collapseT) }
     private var memmiSize: CGFloat { lerp(108, 76, collapseT) }
     private var memmiYOffset: CGFloat { lerp(8, 4, collapseT) }
-    private var badgeTopPadding: CGFloat { lerp(10, 7, collapseT) }
+    private var badgeTopPadding: CGFloat {
+        ((size - memmiSize) / 2) + memmiYOffset + (memmiSize * 0.035)
+    }
 
     private var ringOpacity: Double { Double(1 - collapseT) }
 
