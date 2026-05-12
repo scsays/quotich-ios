@@ -13,8 +13,9 @@ struct MonsterRingAvatar: View {
     // Keep Memmi crisp while giving the state badge more breathing room above the art.
     private var size: CGFloat { lerp(152, 102, collapseT) }
     private var ringLine: CGFloat { lerp(11, 8, collapseT) }
-    private var memmiSize: CGFloat { lerp(108, 76, collapseT) }
-    private var badgeTopPadding: CGFloat { lerp(5, 4, collapseT) }
+    private var memmiSize: CGFloat { lerp(104, 76, collapseT) }
+    private var memmiYOffset: CGFloat { lerp(-10, -6, collapseT) }
+    private var badgeBottomPadding: CGFloat { lerp(8, 5, collapseT) }
 
     private var ringOpacity: Double { Double(1 - collapseT) }
 
@@ -74,6 +75,7 @@ struct MonsterRingAvatar: View {
             }
         }
         .frame(width: memmiSize, height: memmiSize)
+        .offset(y: memmiYOffset)
         .compositingGroup()
         .shadow(
             color: Color.black.opacity(scheme == .dark ? 0.25 : 0.10),
@@ -89,12 +91,13 @@ struct MonsterRingAvatar: View {
         let mood = MonsterMood.from(progress: progress)
 
         return VStack {
-            if collapseT < 0.85 {
-                MonsterMoodStatusBadge(mood: mood, size: size, scheme: scheme, fontStyle: badgeFontStyle)
-                    .padding(.top, badgeTopPadding)
-            }
-
             Spacer(minLength: 0)
+
+            if collapseT < 0.30 {
+                MonsterMoodStatusBadge(mood: mood, size: size, scheme: scheme, fontStyle: badgeFontStyle)
+                    .padding(.bottom, badgeBottomPadding)
+                    .transition(.opacity.combined(with: .scale(scale: 0.96)))
+            }
         }
         .frame(width: size, height: size)
         .allowsHitTesting(false)

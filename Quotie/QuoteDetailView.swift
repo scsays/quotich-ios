@@ -147,6 +147,7 @@ struct QuoteDetailView: View {
 
             dateConsumedBadge
         }
+        .frame(maxWidth: .infinity, alignment: .trailing)
     }
 
     private var dateConsumedBadge: some View {
@@ -177,6 +178,7 @@ struct QuoteDetailView: View {
             Capsule(style: .continuous)
                 .stroke(DesignSystem.monsterPurple.opacity(scheme == .dark ? 0.28 : 0.18), lineWidth: 1)
         )
+        .frame(maxWidth: .infinity, alignment: .trailing)
         .accessibilityElement(children: .combine)
     }
 

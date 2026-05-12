@@ -19,7 +19,7 @@ struct MemmiBubble: View {
                         .fill(Color(.secondarySystemBackground))
                 )
         }
-        .padding(.horizontal)
+        .frame(maxWidth: .infinity, alignment: .trailing)
         .transition(.opacity)
     }
 }

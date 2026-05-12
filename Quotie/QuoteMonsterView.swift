@@ -28,10 +28,15 @@ enum MonsterMood: String {
     }
 
     /// Visual progress for meters. Enlightened starts at hunger level 4,
-    /// so it should read as full even before the persisted cap of 5.
+    /// so content should sit near 4/5 and enlightened should read full.
     static func visualProgress(fromHungerLevel hungerLevel: Int) -> Double {
-        if from(hungerLevel: hungerLevel) == .enlightened { return 1.0 }
-        return min(max(Double(hungerLevel) / 5.0, 0), 1)
+        switch hungerLevel {
+        case ...0: return 0.0
+        case 1:    return 0.2
+        case 2:    return 0.4
+        case 3:    return 0.8
+        default:   return 1.0
+        }
     }
 
     var assetName: String {
@@ -58,13 +63,13 @@ struct MonsterMoodStatusBadge: View {
 
     var body: some View {
         Text(mood.displayName)
-            .font(.system(size: max(10, size * 0.105), weight: .black, design: fontDesign(for: fontStyle)))
+            .font(.system(size: max(9, size * 0.088), weight: .black, design: fontDesign(for: fontStyle)))
             .kerning(0.25)
             .foregroundStyle(scheme == .dark ? Color(red: 0.13, green: 0.08, blue: 0.05) : Color(red: 0.10, green: 0.06, blue: 0.04))
             .lineLimit(1)
             .minimumScaleFactor(0.68)
-            .padding(.horizontal, max(10, size * 0.085))
-            .padding(.vertical, max(4, size * 0.03))
+            .padding(.horizontal, max(9, size * 0.072))
+            .padding(.vertical, max(3, size * 0.024))
             .background(
                 Capsule(style: .continuous)
                     .fill(Color(red: 1.0, green: 0.91, blue: 0.74).opacity(scheme == .dark ? 0.96 : 0.98))
