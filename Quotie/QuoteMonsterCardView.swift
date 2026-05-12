@@ -39,7 +39,11 @@ struct QuoteMonsterCardView: View {
                 .padding(.horizontal, 22)
                 .padding(.top, 18)
 
-                QuoteMonsterView(mood: MonsterMood.from(hungerLevel: store.hungerLevel), size: 150)
+                QuoteMonsterView(
+                    mood: MonsterMood.from(hungerLevel: store.hungerLevel),
+                    size: 150,
+                    badgeFontStyle: store.majorityFontStyle()
+                )
                     .padding(.top, 4)
 
                 // Hunger meter card

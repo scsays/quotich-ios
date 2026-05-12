@@ -125,6 +125,17 @@ final class QuoteStore: ObservableObject {
         }
     }
 
+    func majorityFontStyle(default fallback: FontStyle = .rounded) -> FontStyle {
+        guard !quotes.isEmpty else { return fallback }
+
+        let counts = Dictionary(grouping: quotes, by: \.fontStyle)
+            .mapValues { $0.count }
+
+        return FontStyle.allCases.max { lhs, rhs in
+            counts[lhs, default: 0] < counts[rhs, default: 0]
+        } ?? fallback
+    }
+
     func delete(_ quote: Quote) {
         quotes.removeAll { $0.id == quote.id }
         updateWidgetQuoteOfTheDay()

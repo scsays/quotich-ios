@@ -54,10 +54,11 @@ struct MonsterMoodStatusBadge: View {
     let mood: MonsterMood
     let size: CGFloat
     let scheme: ColorScheme
+    var fontStyle: FontStyle = .rounded
 
     var body: some View {
         Text(mood.displayName)
-            .font(.system(size: max(10, size * 0.105), weight: .black, design: .rounded))
+            .font(.system(size: max(10, size * 0.105), weight: .black, design: fontDesign(for: fontStyle)))
             .kerning(0.25)
             .foregroundStyle(scheme == .dark ? Color(red: 0.13, green: 0.08, blue: 0.05) : Color(red: 0.10, green: 0.06, blue: 0.04))
             .lineLimit(1)
@@ -76,6 +77,14 @@ struct MonsterMoodStatusBadge: View {
             .shadow(color: Color.black.opacity(scheme == .dark ? 0.20 : 0.10), radius: 2.5, x: 0, y: 1.2)
             .accessibilityHidden(true)
     }
+
+    private func fontDesign(for style: FontStyle) -> Font.Design {
+        switch style {
+        case .standard: return .default
+        case .serif: return .serif
+        case .rounded: return .rounded
+        }
+    }
 }
 
 // MARK: - QuoteMonsterView
@@ -85,6 +94,7 @@ struct QuoteMonsterView: View {
 
     let mood: MonsterMood
     var size: CGFloat = 64
+    var badgeFontStyle: FontStyle = .rounded
 
     var body: some View {
         let uiImage = MemmiImageCache.image(named: mood.assetName, scheme: scheme)
@@ -100,7 +110,7 @@ struct QuoteMonsterView: View {
                     .scaledToFit()
                     .overlay(alignment: .top) {
                         if size >= 96 {
-                            MonsterMoodStatusBadge(mood: mood, size: size, scheme: scheme)
+                            MonsterMoodStatusBadge(mood: mood, size: size, scheme: scheme, fontStyle: badgeFontStyle)
                                 .padding(.top, size * 0.035)
                         }
                     }

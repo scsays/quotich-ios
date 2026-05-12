@@ -6,6 +6,7 @@ struct MonsterRingAvatar: View {
 
     let progress: Double          // 0.0 ... 1.0
     let collapseT: CGFloat        // 0 = expanded, 1 = collapsed
+    var badgeFontStyle: FontStyle = .rounded
     let onTap: () -> Void
 
     // MARK: - Sizing
@@ -89,7 +90,7 @@ struct MonsterRingAvatar: View {
 
         return VStack {
             if collapseT < 0.85 {
-                MonsterMoodStatusBadge(mood: mood, size: size, scheme: scheme)
+                MonsterMoodStatusBadge(mood: mood, size: size, scheme: scheme, fontStyle: badgeFontStyle)
                     .padding(.top, badgeTopPadding)
             }
 

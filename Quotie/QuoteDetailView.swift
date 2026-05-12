@@ -40,17 +40,16 @@ struct QuoteDetailView: View {
             bg.ignoresSafeArea()
 
             VStack(spacing: 18) {
-                Spacer(minLength: 10)
-
                 bigQuoteCard
                 memmiSection
-                Spacer(minLength: 8)
-                actionRow
 
-                Spacer(minLength: 4)
+                Spacer(minLength: 24)
+
+                actionRow
             }
             .padding(.horizontal, 18)
-            .padding(.bottom, 18)
+            .padding(.top, 22)
+            .padding(.bottom, 26)
         }
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
@@ -132,7 +131,7 @@ struct QuoteDetailView: View {
     // MARK: - Memmi Section
 
     private var memmiSection: some View {
-        Group {
+        VStack(spacing: 12) {
             if isLoadingMemmi {
                 MemmiBubble(text: "Memmi is chewing on this one…")
                     .opacity(0.7)
@@ -145,7 +144,52 @@ struct QuoteDetailView: View {
                     )
                     .animation(.spring(response: 0.4, dampingFraction: 0.75), value: showMemmiEntrance)
             }
+
+            dateConsumedBadge
         }
+    }
+
+    private var dateConsumedBadge: some View {
+        HStack(spacing: 7) {
+            Image(systemName: "fork.knife.circle.fill")
+                .font(.system(size: 13, weight: .bold))
+
+            Text("Date consumed")
+                .font(.system(.caption, design: .rounded, weight: .bold))
+                .textCase(.uppercase)
+                .kerning(0.7)
+
+            Circle()
+                .fill(DesignSystem.monsterPurple.opacity(0.45))
+                .frame(width: 4, height: 4)
+
+            Text(consumedDateText)
+                .font(.system(.caption, design: fontDesign(for: currentQuote.fontStyle), weight: .semibold))
+        }
+        .foregroundStyle(DesignSystem.monsterPurple)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .background(
+            Capsule(style: .continuous)
+                .fill(DesignSystem.monsterPurple.opacity(scheme == .dark ? 0.18 : 0.11))
+        )
+        .overlay(
+            Capsule(style: .continuous)
+                .stroke(DesignSystem.monsterPurple.opacity(scheme == .dark ? 0.28 : 0.18), lineWidth: 1)
+        )
+        .accessibilityElement(children: .combine)
+    }
+
+    private var consumedDateText: String {
+        guard currentQuote.createdAt != .distantPast else { return "Unknown" }
+
+        return currentQuote.createdAt.formatted(
+            .dateTime
+                .weekday(.wide)
+                .month(.abbreviated)
+                .day()
+                .year()
+        )
     }
 
     // MARK: - Action Row

@@ -178,6 +178,7 @@ struct HomeFeedView: View {
                 MonsterRingAvatar(
                     progress: MonsterMood.visualProgress(fromHungerLevel: store.hungerLevel),
                     collapseT: collapseT,
+                    badgeFontStyle: store.majorityFontStyle(),
                     onTap: { showingMonsterStats = true }
                 )
                 .padding(.top, 18)

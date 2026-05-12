@@ -117,7 +117,10 @@ struct ContentView: View {
     private var floatingMonster: some View {
         GeometryReader { geo in
             VStack(spacing: 10) {
-                QuoteMonsterView(mood: MonsterMood.from(hungerLevel: store.hungerLevel))
+                QuoteMonsterView(
+                    mood: MonsterMood.from(hungerLevel: store.hungerLevel),
+                    badgeFontStyle: store.majorityFontStyle()
+                )
                     .scaleEffect(isDocked ? 0.9 : 1.15)
 
                 if !isDocked {
@@ -238,4 +241,3 @@ struct HeaderChromeView: View {
         .padding(.top, 10)
     }
 }
-
