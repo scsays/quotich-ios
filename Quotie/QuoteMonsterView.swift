@@ -5,36 +5,37 @@ import SwiftUI
 enum MonsterMood: String {
     case starving, hungry, snackish, content, enlightened
 
-    /// Derive mood from raw hunger level (0–5).
+    /// Derive mood from raw hunger level.
+    /// The visible ladder is: Starting 1/5, Hungry 2/5,
+    /// Snackish 3/5, Content 4/5, Enlightened 5/5.
     static func from(hungerLevel: Int) -> MonsterMood {
         switch hungerLevel {
-        case 0:    return .starving
-        case 1:    return .hungry
-        case 2:    return .snackish
-        case 3:    return .content
-        default:   return .enlightened   // 4 and 5
+        case ...1: return .starving
+        case 2:    return .hungry
+        case 3:    return .snackish
+        case 4:    return .content
+        default:   return .enlightened
         }
     }
 
     /// Derive mood from normalised progress (0.0–1.0) used by the ring avatar.
     static func from(progress: Double) -> MonsterMood {
         switch progress {
-        case ..<0.01: return .starving
-        case ..<0.21: return .hungry
-        case ..<0.41: return .snackish
-        case ..<0.61: return .content
-        default:      return .enlightened
+        case ...0.2: return .starving
+        case ...0.4: return .hungry
+        case ...0.6: return .snackish
+        case ...0.8: return .content
+        default:     return .enlightened
         }
     }
 
-    /// Visual progress for meters. Enlightened starts at hunger level 4,
-    /// so content should sit near 4/5 and enlightened should read full.
+    /// Visual progress for meters: one mood per fifth of the meter.
     static func visualProgress(fromHungerLevel hungerLevel: Int) -> Double {
         switch hungerLevel {
-        case ...0: return 0.0
-        case 1:    return 0.2
+        case ...1: return 0.2
         case 2:    return 0.4
-        case 3:    return 0.8
+        case 3:    return 0.6
+        case 4:    return 0.8
         default:   return 1.0
         }
     }
@@ -50,7 +51,12 @@ enum MonsterMood: String {
     }
 
     /// A user-facing display label.
-    var displayName: String { rawValue.capitalized }
+    var displayName: String {
+        switch self {
+        case .starving: return "Starting"
+        default:        return rawValue.capitalized
+        }
+    }
 }
 
 // MARK: - Monster Mood Status Badge
