@@ -22,6 +22,11 @@ struct HomeFeedView: View {
     private struct QuoteSheetItem: Identifiable, Equatable { let id: UUID }
     @State private var quoteSheetItem: QuoteSheetItem? = nil
 
+    @State private var selectedCardIndex = 0
+    @State private var previousCardIndex = 0
+    @AppStorage("memmi.cardViewDidSwipeLeft") private var didSwipeLeftInCardView = false
+    @AppStorage("memmi.cardViewDidSwipeRight") private var didSwipeRightInCardView = false
+
     // 0 = hero, 1 = collapsed header
     private var collapseT: CGFloat {
         let start: CGFloat = 10
@@ -101,15 +106,28 @@ struct HomeFeedView: View {
             if filteredQuotes.isEmpty {
                 emptyCardView
             } else {
-                TabView {
-                    ForEach(filteredQuotes) { quote in
-                        largeQuoteCard(quote)
+                TabView(selection: $selectedCardIndex) {
+                    ForEach(Array(filteredQuotes.enumerated()), id: \.element.id) { index, quote in
+                        largeQuoteCard(quote, index: index, totalCount: filteredQuotes.count)
                             .padding(.horizontal, 22)
-                            .padding(.top, 150)
-                            .padding(.bottom, 120)
+                            .padding(.top, 210)
+                            .padding(.bottom, 96)
+                            .tag(index)
                     }
                 }
                 .tabViewStyle(.page(indexDisplayMode: .automatic))
+                .onChange(of: selectedCardIndex) { newIndex in
+                    if newIndex > previousCardIndex {
+                        didSwipeLeftInCardView = true
+                    } else if newIndex < previousCardIndex {
+                        didSwipeRightInCardView = true
+                    }
+                    previousCardIndex = newIndex
+                }
+                .onChange(of: filteredQuotes.count) { count in
+                    selectedCardIndex = min(selectedCardIndex, max(count - 1, 0))
+                    previousCardIndex = selectedCardIndex
+                }
             }
         }
     }
@@ -129,7 +147,7 @@ struct HomeFeedView: View {
         .padding(.horizontal, 32)
     }
 
-    private func largeQuoteCard(_ quote: Quote) -> some View {
+    private func largeQuoteCard(_ quote: Quote, index: Int, totalCount: Int) -> some View {
         Button {
             quoteSheetItem = QuoteSheetItem(id: quote.id)
         } label: {
@@ -157,11 +175,25 @@ struct HomeFeedView: View {
 
                 Spacer(minLength: 0)
 
-                HStack {
-                    Label("Swipe left for older quotes", systemImage: "arrow.left")
-                        .font(DesignSystem.appFont(.caption, weight: .semibold))
-                        .foregroundStyle(DesignSystem.secondaryText(scheme))
+                HStack(alignment: .bottom) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        if index < totalCount - 1 && !didSwipeLeftInCardView {
+                            Label("Swipe left for older quotes", systemImage: "arrow.left")
+                                .transition(.opacity.combined(with: .move(edge: .leading)))
+                        }
+
+                        if index > 0 && !didSwipeRightInCardView {
+                            Label("Swipe right for newer quotes", systemImage: "arrow.right")
+                                .transition(.opacity.combined(with: .move(edge: .trailing)))
+                        }
+                    }
+                    .font(DesignSystem.appFont(.caption, weight: .semibold))
+                    .foregroundStyle(DesignSystem.secondaryText(scheme))
+                    .animation(.easeOut(duration: 0.2), value: didSwipeLeftInCardView)
+                    .animation(.easeOut(duration: 0.2), value: didSwipeRightInCardView)
+
                     Spacer()
+
                     Image(systemName: quote.isFavorite ? "heart.fill" : "heart")
                         .font(DesignSystem.appFont(size: 18, weight: .heavy))
                         .foregroundStyle(quote.isFavorite ? DesignSystem.monsterPurple : DesignSystem.secondaryText(scheme))
