@@ -66,7 +66,7 @@ struct HomeFeedView: View {
                     }
                     .id(gridRefreshID) // ✅ key fix: rebuild the grid when we say so
                     .padding(.horizontal, 16)
-                    .padding(.top, lerp(160, 92, collapseT))
+                    .padding(.top, lerp(200, 116, collapseT))
                     .padding(.bottom, 110)
                     .background(catchAllDropTarget) // ✅ drop reset without overlaying touches
                 }
@@ -303,10 +303,10 @@ struct HomeFeedView: View {
                 MonsterRingAvatar(
                     progress: MonsterMood.visualProgress(fromHungerLevel: store.hungerLevel),
                     collapseT: collapseT,
-                    badgeFontStyle: store.majorityFontStyle(),
+                    badgeFontStyle: .rounded,
                     onTap: { showingMonsterStats = true }
                 )
-                .padding(.top, 18)
+                .padding(.top, 8)
                 .scaleEffect(lerp(1.0, 0.70, t))
                 .opacity(heroOpacity)
             }

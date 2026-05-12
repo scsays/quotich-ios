@@ -69,7 +69,7 @@ struct MonsterMoodStatusBadge: View {
 
     var body: some View {
         Text(mood.displayName)
-            .font(.system(size: max(9, size * 0.088), weight: .black, design: fontDesign(for: fontStyle)))
+            .font(DesignSystem.appFont(size: max(9, size * 0.088), weight: .black))
             .kerning(0.25)
             .foregroundStyle(scheme == .dark ? Color(red: 0.13, green: 0.08, blue: 0.05) : Color(red: 0.10, green: 0.06, blue: 0.04))
             .lineLimit(1)
@@ -89,13 +89,6 @@ struct MonsterMoodStatusBadge: View {
             .accessibilityHidden(true)
     }
 
-    private func fontDesign(for style: FontStyle) -> Font.Design {
-        switch style {
-        case .standard: return .monospaced
-        case .serif: return .serif
-        case .rounded: return .rounded
-        }
-    }
 }
 
 // MARK: - QuoteMonsterView
