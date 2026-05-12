@@ -15,6 +15,14 @@ enum FontStyle: String, Codable, CaseIterable {
     case standard
     case serif
     case rounded
+
+    var displayName: String {
+        switch self {
+        case .rounded: return "Memmi"
+        case .standard: return "Typewriter"
+        case .serif: return "Flowy"
+        }
+    }
 }
 
 struct Quote: Identifiable, Codable {

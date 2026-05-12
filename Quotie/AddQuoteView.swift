@@ -105,9 +105,9 @@ struct AddQuoteView: View {
 
                             if showFontOptions {
                                 Picker("Font", selection: $selectedFontStyle) {
-                                    Text("Modern").tag(FontStyle.standard)
-                                    Text("Poetic").tag(FontStyle.serif)
-                                    Text("Personal").tag(FontStyle.rounded)
+                                    Text(FontStyle.rounded.displayName).tag(FontStyle.rounded)
+                                    Text(FontStyle.standard.displayName).tag(FontStyle.standard)
+                                    Text(FontStyle.serif.displayName).tag(FontStyle.serif)
                                 }
                                 .pickerStyle(.segmented)
                                 .padding(.top, 4)

@@ -4,7 +4,7 @@ struct BottomTabBar: View {
     @Environment(\.colorScheme) private var scheme
 
     @Binding var selectedTab: AppTab
-    @Binding var favoritesOnly: Bool
+    @Binding var viewMode: HomeViewMode
 
     var onSnackTapped: () -> Void
     var onSearchTapped: () -> Void
@@ -33,13 +33,19 @@ struct BottomTabBar: View {
                     .foregroundStyle(inactiveColor) // ✅ now gray
             }
 
-            // Favorites (toggles filter on Home)
-            Button {
-                favoritesOnly.toggle()
-                selectedTab = .home
+            // View menu (Grid / Favorites / Card)
+            Menu {
+                ForEach(HomeViewMode.allCases) { mode in
+                    Button {
+                        viewMode = mode
+                        selectedTab = .home
+                    } label: {
+                        Label(mode.title, systemImage: mode.systemImage)
+                    }
+                }
             } label: {
-                tabLabel(system: favoritesOnly ? "heart.fill" : "heart", title: "Favorites")
-                    .foregroundStyle(favoritesOnly ? activeColor : inactiveColor) // ✅ purple only when active
+                tabLabel(system: viewMode.systemImage, title: "View")
+                    .foregroundStyle(viewMode == .grid ? inactiveColor : activeColor)
             }
 
             // Add Quote (big +)
@@ -91,7 +97,7 @@ struct BottomTabBar: View {
             Image(systemName: system)
                 .font(.system(size: 18, weight: .semibold))
             Text(title)
-                .font(.caption2)
+                .font(DesignSystem.appFont(.caption2, weight: .semibold))
         }
         .frame(maxWidth: .infinity)
     }

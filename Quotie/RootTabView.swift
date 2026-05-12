@@ -5,6 +5,38 @@ enum AppTab: String {
     // Snack Bar is presented modally (fullScreenCover)
 }
 
+enum HomeViewMode: String, CaseIterable, Identifiable {
+    case grid
+    case favorites
+    case card
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .grid: return "Grid View"
+        case .favorites: return "Favorites View"
+        case .card: return "Card View"
+        }
+    }
+
+    var shortTitle: String {
+        switch self {
+        case .grid: return "Grid"
+        case .favorites: return "Favorites"
+        case .card: return "Card"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .grid: return "square.grid.2x2"
+        case .favorites: return "heart.fill"
+        case .card: return "rectangle.portrait.on.rectangle.portrait"
+        }
+    }
+}
+
 struct RootTabView: View {
     @StateObject private var store = QuoteStore()
     @ObservedObject private var notifications = MemmiNotifications.shared
@@ -15,7 +47,7 @@ struct RootTabView: View {
     @State private var showingSnackBar = false
 
     @State private var isScrolling: Bool = false
-    @State private var favoritesOnly: Bool = false
+    @State private var homeViewMode: HomeViewMode = .grid
 
     // Deep-link: set when user taps a resurface notification
     @State private var resurfacedQuote: Quote?
@@ -26,7 +58,7 @@ struct RootTabView: View {
                 switch selectedTab {
                 case .home:
                     HomeFeedView(
-                        favoritesOnly: favoritesOnly,
+                        viewMode: homeViewMode,
                         isSearchActive: showingSearch,
                         isScrolling: $isScrolling
                     )
@@ -48,7 +80,7 @@ struct RootTabView: View {
                 ZStack {
                     BottomTabBar(
                         selectedTab: $selectedTab,
-                        favoritesOnly: $favoritesOnly,
+                        viewMode: $homeViewMode,
                         onSnackTapped: { showingSnackBar = true },
                         onSearchTapped: { showingSearch = true },
                         onAddTapped: { showingAddQuote = true },
@@ -114,5 +146,6 @@ struct RootTabView: View {
                     .environmentObject(store)
             }
         }
+        .font(DesignSystem.appFont(.body))
     }
 }

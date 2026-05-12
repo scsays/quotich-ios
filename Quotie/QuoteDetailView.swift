@@ -320,7 +320,7 @@ struct QuoteDetailView: View {
 
     private func fontDesign(for style: FontStyle) -> Font.Design {
         switch style {
-        case .standard: return .default
+        case .standard: return .monospaced
         case .serif: return .serif
         case .rounded: return .rounded
         }
@@ -547,7 +547,7 @@ private struct PostToCommunitySheet: View {
 
     private func fontDesign(for style: FontStyle) -> Font.Design {
         switch style {
-        case .standard: return .default
+        case .standard: return .monospaced
         case .serif: return .serif
         case .rounded: return .rounded
         }
@@ -566,6 +566,7 @@ private struct EditQuoteSheet: View {
     @State private var author: String = ""
     @State private var source: String = ""
     @State private var colorStyle: PastelStyle = .mint
+    @State private var fontStyle: FontStyle = .rounded
 
     var body: some View {
         NavigationView {
@@ -583,6 +584,15 @@ private struct EditQuoteSheet: View {
                     Section("Details") {
                         TextField("Author", text: $author)
                         TextField("Source", text: $source)
+                    }
+
+                    Section("Quote Font") {
+                        Picker("Quote Font", selection: $fontStyle) {
+                            Text(FontStyle.rounded.displayName).tag(FontStyle.rounded)
+                            Text(FontStyle.standard.displayName).tag(FontStyle.standard)
+                            Text(FontStyle.serif.displayName).tag(FontStyle.serif)
+                        }
+                        .pickerStyle(.segmented)
                     }
 
                     Section("Card Color") {
@@ -626,7 +636,7 @@ private struct EditQuoteSheet: View {
                                 colorStyle: colorStyle,
                                 timesResurfaced: quote.timesResurfaced,
                                 lastResurfacedAt: quote.lastResurfacedAt,
-                                fontStyle: quote.fontStyle,
+                                fontStyle: fontStyle,
                                 memmiReaction: quote.memmiReaction,
                                 createdAt: quote.createdAt
                             )
@@ -642,6 +652,7 @@ private struct EditQuoteSheet: View {
                     author = quote.author
                     source = quote.source
                     colorStyle = quote.colorStyle
+                    fontStyle = quote.fontStyle
                 }
                 .padding(.top, 24)
             }

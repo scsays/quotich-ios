@@ -11,7 +11,7 @@ struct QuoteCardView: View {
         VStack(alignment: .leading, spacing: 10) {
 
             Text("“\(quote.text)”")
-                .font(.system(size: 22, weight: .semibold, design: .rounded))
+                .font(DesignSystem.quoteFont(quote.fontStyle, size: 22, weight: .semibold))
                 .foregroundColor(
                     DesignSystem.primaryText(colorScheme)
                 )

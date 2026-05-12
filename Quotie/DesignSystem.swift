@@ -50,6 +50,38 @@ enum AppAppearance: String, CaseIterable, Identifiable {
 
 enum DesignSystem {
 
+    // MARK: - Typography
+
+    static func appFont(_ style: Font.TextStyle, weight: Font.Weight = .regular) -> Font {
+        .system(style, design: .rounded, weight: weight)
+    }
+
+    static func appFont(size: CGFloat, weight: Font.Weight = .regular) -> Font {
+        .system(size: size, weight: weight, design: .rounded)
+    }
+
+    static func quoteFont(_ style: FontStyle, textStyle: Font.TextStyle, weight: Font.Weight = .semibold) -> Font {
+        switch style {
+        case .rounded:
+            return .system(textStyle, design: .rounded, weight: weight)
+        case .standard:
+            return .system(textStyle, design: .monospaced, weight: weight)
+        case .serif:
+            return .system(textStyle, design: .serif, weight: weight)
+        }
+    }
+
+    static func quoteFont(_ style: FontStyle, size: CGFloat, weight: Font.Weight = .semibold) -> Font {
+        switch style {
+        case .rounded:
+            return .system(size: size, weight: weight, design: .rounded)
+        case .standard:
+            return .system(size: size, weight: weight, design: .monospaced)
+        case .serif:
+            return .system(size: size, weight: weight, design: .serif)
+        }
+    }
+
     // MARK: - Core Colors
 
     static let monsterPurple = Color(
@@ -210,7 +242,6 @@ extension View {
         )
     }
 }
-
 
 
 

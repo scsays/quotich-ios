@@ -9,7 +9,7 @@ struct MasonryQuoteCard: View {
         VStack(alignment: .leading, spacing: 10) {
 
             Text("“\(quote.text)”")
-                .font(font(for: quote.fontStyle))
+                .font(DesignSystem.quoteFont(quote.fontStyle, textStyle: .subheadline))
                 .foregroundStyle(DesignSystem.primaryText(scheme))
                 .fixedSize(horizontal: false, vertical: true)
 
@@ -49,11 +49,4 @@ struct MasonryQuoteCard: View {
         )
     }
 
-    private func font(for style: FontStyle) -> Font {
-        switch style {
-        case .standard: return .system(.subheadline, design: .default)
-        case .serif:    return .system(.subheadline, design: .serif)
-        case .rounded:  return .system(.subheadline, design: .rounded)
-        }
-    }
 }

@@ -28,6 +28,7 @@ struct QuotieApp: App {
                 }
             }
             .environmentObject(auth)
+            .font(DesignSystem.appFont(.body))
             .preferredColorScheme(appAppearance.colorScheme)
             .task {
                 await auth.start()

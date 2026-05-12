@@ -5,7 +5,7 @@ struct HomeFeedView: View {
     @Environment(\.colorScheme) private var scheme
     @EnvironmentObject private var store: QuoteStore
 
-    let favoritesOnly: Bool
+    let viewMode: HomeViewMode
     let isSearchActive: Bool
     @Binding var isScrolling: Bool
 
@@ -34,7 +34,7 @@ struct HomeFeedView: View {
     private var canReorder: Bool { false }
 
     private var filteredQuotes: [Quote] {
-        let base = favoritesOnly ? store.quotes.filter { $0.isFavorite } : store.quotes
+        let base = viewMode == .favorites ? store.quotes.filter { $0.isFavorite } : store.quotes
         return base.sorted { $0.createdAt > $1.createdAt }
     }
 
@@ -44,27 +44,31 @@ struct HomeFeedView: View {
         ZStack(alignment: .top) {
             bg.ignoresSafeArea()
 
-            ScrollView {
-                LazyVGrid(
-                    columns: [
-                        GridItem(.flexible(), spacing: 14),
-                        GridItem(.flexible(), spacing: 14)
-                    ],
-                    spacing: 14
-                ) {
-                    ForEach(filteredQuotes) { quote in
-                        quoteCell(quote)
+            if viewMode == .card {
+                cardPager
+            } else {
+                ScrollView {
+                    LazyVGrid(
+                        columns: [
+                            GridItem(.flexible(), spacing: 14),
+                            GridItem(.flexible(), spacing: 14)
+                        ],
+                        spacing: 14
+                    ) {
+                        ForEach(filteredQuotes) { quote in
+                            quoteCell(quote)
+                        }
                     }
+                    .id(gridRefreshID) // ✅ key fix: rebuild the grid when we say so
+                    .padding(.horizontal, 16)
+                    .padding(.top, lerp(160, 92, collapseT))
+                    .padding(.bottom, 110)
+                    .background(catchAllDropTarget) // ✅ drop reset without overlaying touches
                 }
-                .id(gridRefreshID) // ✅ key fix: rebuild the grid when we say so
-                .padding(.horizontal, 16)
-                .padding(.top, lerp(160, 92, collapseT))
-                .padding(.bottom, 110)
-                .background(catchAllDropTarget) // ✅ drop reset without overlaying touches
-            }
-            .trackScrollPhase(isScrolling: $isScrolling)
-            .onScrollGeometryChange(for: CGFloat.self) { geo in geo.contentOffset.y } action: { _, newOffset in
-                scrollY = newOffset
+                .trackScrollPhase(isScrolling: $isScrolling)
+                .onScrollGeometryChange(for: CGFloat.self) { geo in geo.contentOffset.y } action: { _, newOffset in
+                    scrollY = newOffset
+                }
             }
 
             topMonsterAndHeader(bg: bg)
@@ -83,6 +87,95 @@ struct HomeFeedView: View {
                 EmptyView()
             }
         }
+        .onChange(of: viewMode) { mode in
+            if mode == .card {
+                isScrolling = false
+                scrollY = 0
+            }
+        }
+    }
+
+    // MARK: - Card View
+    private var cardPager: some View {
+        Group {
+            if filteredQuotes.isEmpty {
+                emptyCardView
+            } else {
+                TabView {
+                    ForEach(filteredQuotes) { quote in
+                        largeQuoteCard(quote)
+                            .padding(.horizontal, 22)
+                            .padding(.top, 150)
+                            .padding(.bottom, 120)
+                    }
+                }
+                .tabViewStyle(.page(indexDisplayMode: .automatic))
+            }
+        }
+    }
+
+    private var emptyCardView: some View {
+        VStack(spacing: 12) {
+            Image(systemName: viewMode == .favorites ? "heart" : "quote.opening")
+                .font(DesignSystem.appFont(size: 34, weight: .bold))
+                .foregroundStyle(DesignSystem.monsterPurple)
+            Text(viewMode == .favorites ? "No favorites yet" : "No quotes yet")
+                .font(DesignSystem.appFont(.title3, weight: .bold))
+            Text(viewMode == .favorites ? "Favorite a quote, then it’ll show up here." : "Tap + to feed Memmi a quote.")
+                .font(DesignSystem.appFont(.subheadline))
+                .foregroundStyle(DesignSystem.secondaryText(scheme))
+        }
+        .multilineTextAlignment(.center)
+        .padding(.horizontal, 32)
+    }
+
+    private func largeQuoteCard(_ quote: Quote) -> some View {
+        Button {
+            quoteSheetItem = QuoteSheetItem(id: quote.id)
+        } label: {
+            VStack(alignment: .leading, spacing: 18) {
+                Spacer(minLength: 0)
+
+                Text("“\(quote.text)”")
+                    .font(DesignSystem.quoteFont(quote.fontStyle, textStyle: .title, weight: .semibold))
+                    .foregroundStyle(DesignSystem.primaryText(scheme))
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if !quote.author.isEmpty || !quote.source.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        if !quote.author.isEmpty {
+                            Text("— \(quote.author)")
+                                .font(DesignSystem.appFont(.headline, weight: .bold))
+                        }
+                        if !quote.source.isEmpty {
+                            Text(quote.source)
+                                .font(DesignSystem.appFont(.subheadline, weight: .semibold))
+                        }
+                    }
+                    .foregroundStyle(DesignSystem.secondaryText(scheme))
+                }
+
+                Spacer(minLength: 0)
+
+                HStack {
+                    Label("Swipe left for older quotes", systemImage: "arrow.left")
+                        .font(DesignSystem.appFont(.caption, weight: .semibold))
+                        .foregroundStyle(DesignSystem.secondaryText(scheme))
+                    Spacer()
+                    Image(systemName: quote.isFavorite ? "heart.fill" : "heart")
+                        .font(DesignSystem.appFont(size: 18, weight: .heavy))
+                        .foregroundStyle(quote.isFavorite ? DesignSystem.monsterPurple : DesignSystem.secondaryText(scheme))
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            .padding(26)
+            .background(
+                RoundedRectangle(cornerRadius: 32, style: .continuous)
+                    .fill(DesignSystem.cardGradient(for: quote.colorStyle, scheme: scheme))
+                    .shadow(color: DesignSystem.cardShadow, radius: 18, y: 8)
+            )
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Quote Cell (Tap + Drag/Drop)

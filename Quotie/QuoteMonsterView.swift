@@ -91,7 +91,7 @@ struct MonsterMoodStatusBadge: View {
 
     private func fontDesign(for style: FontStyle) -> Font.Design {
         switch style {
-        case .standard: return .default
+        case .standard: return .monospaced
         case .serif: return .serif
         case .rounded: return .rounded
         }
