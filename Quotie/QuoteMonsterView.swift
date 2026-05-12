@@ -6,7 +6,7 @@ enum MonsterMood: String {
     case starving, hungry, snackish, content, enlightened
 
     /// Derive mood from raw hunger level.
-    /// The visible ladder is: Starting 1/5, Hungry 2/5,
+    /// The visible ladder is: Starving 1/5, Hungry 2/5,
     /// Snackish 3/5, Content 4/5, Enlightened 5/5.
     static func from(hungerLevel: Int) -> MonsterMood {
         switch hungerLevel {
@@ -53,7 +53,7 @@ enum MonsterMood: String {
     /// A user-facing display label.
     var displayName: String {
         switch self {
-        case .starving: return "Starting"
+        case .starving: return "Starving"
         default:        return rawValue.capitalized
         }
     }
