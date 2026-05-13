@@ -60,13 +60,8 @@ struct OnboardingFlowView: View {
                     .shadow(color: .black.opacity(0.14), radius: 7, y: 4)
             }
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Meet Memmi")
-                    .font(DesignSystem.appFont(.title3, weight: .black))
-                Text("Your living quote collection")
-                    .font(DesignSystem.appFont(.caption, weight: .semibold))
-                    .foregroundStyle(DesignSystem.secondaryText(scheme))
-            }
+            Text("Meet Memmi")
+                .font(DesignSystem.appFont(.title2, weight: .black))
 
             Spacer()
 
@@ -139,17 +134,17 @@ private enum OnboardingStep: Int, CaseIterable, Identifiable {
 
     var id: Int { rawValue }
 
-    var eyebrow: String {
+    var title: String {
         switch self {
         case .feedMemmi: return "Hunger Meter"
         case .saveFavorites: return "Your Feed"
         case .snackBar: return "Snack Bar"
         case .community: return "Community Feed"
-        case .comfortReminders: return "Make it yours"
+        case .comfortReminders: return "Make It Yours"
         }
     }
 
-    var title: String {
+    var headline: String {
         switch self {
         case .feedMemmi: return "Feed Memmi your favorite quotes and Memmi will remember them for you"
         case .saveFavorites: return "Save, favorite, edit, and revisit your quotes"
@@ -190,16 +185,17 @@ private struct OnboardingFeatureCard: View {
     let step: OnboardingStep
 
     var body: some View {
-        VStack(spacing: 18) {
-            VStack(spacing: 8) {
-                Text(step.eyebrow.uppercased())
-                    .font(DesignSystem.appFont(.caption, weight: .black))
-                    .kerning(1.3)
-                    .foregroundStyle(DesignSystem.monsterPurple)
-
+        VStack(spacing: 14) {
+            VStack(spacing: 7) {
                 Text(step.title)
-                    .font(DesignSystem.appFont(.title2, weight: .black))
+                    .font(DesignSystem.appFont(.title, weight: .black))
                     .foregroundStyle(DesignSystem.primaryText(scheme))
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Text(step.headline)
+                    .font(DesignSystem.appFont(.headline, weight: .black))
+                    .foregroundStyle(DesignSystem.monsterPurple)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -213,9 +209,10 @@ private struct OnboardingFeatureCard: View {
 
             preview
                 .frame(maxWidth: .infinity)
+                .padding(.top, 8)
         }
         .padding(18)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(
             RoundedRectangle(cornerRadius: 34, style: .continuous)
                 .fill(.ultraThinMaterial)
