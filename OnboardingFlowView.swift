@@ -151,32 +151,32 @@ private enum OnboardingStep: Int, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .feedMemmi: return "Feed Memmi with the words you keep"
-        case .saveFavorites: return "Save, favorite, and revisit your quotes"
+        case .feedMemmi: return "Feed Memmi your favorite quotes and Memmi will remember them for you"
+        case .saveFavorites: return "Save, favorite, edit, and revisit your quotes"
         case .snackBar: return "Grab quick quotes from the Snack Bar"
-        case .community: return "Find quotes from the community"
-        case .comfortReminders: return "Keep Memmi cozy in your rhythm"
+        case .community: return "Find favorite quotes from the Memmi community"
+        case .comfortReminders: return "Memmi looks great in both Light and Dark mode"
         }
     }
 
     var subtitle: String {
         switch self {
         case .feedMemmi:
-            return "Every quote you add fills the Hunger Meter and helps Memmi grow from Starving to Enlightened."
+            return "Every quote feeds the Hunger Meter and helps keep your Memmi happy and Enlightened."
         case .saveFavorites:
-            return "Your newest quotes live in Grid View. Tap the heart to build a favorites view for the lines you need most."
+            return "Your quotes live in your feed, where you can favorite them, edit their font and background color, and even change the feed between Grid, Card, and Favorites view."
         case .snackBar:
             return "Need inspiration fast? Snack Bar gives you ready-to-add quotes that can feed Memmi in a tap."
         case .community:
-            return "Browse community quotes, preview what resonates, then add the best ones straight into your feed."
+            return "Browse community quotes, then favorite and even add the ones you really enjoy straight to your quote feed."
         case .comfortReminders:
-            return "Choose light or dark mode, then let Memmi resurface favorite quotes throughout the day."
+            return "Memmi can also remind you throughout the day of some of your favorite quotes to help keep you motivated with small sparks of remembered inspiration."
         }
     }
 
     var ctaTitle: String {
         switch self {
-        case .feedMemmi: return "Show me the feed"
+        case .feedMemmi: return "Next: Your Feed"
         case .saveFavorites: return "Next: Snack Bar"
         case .snackBar: return "Next: Community"
         case .community: return "Next: comfort"
@@ -191,9 +191,6 @@ private struct OnboardingFeatureCard: View {
 
     var body: some View {
         VStack(spacing: 18) {
-            preview
-                .frame(maxWidth: .infinity)
-
             VStack(spacing: 8) {
                 Text(step.eyebrow.uppercased())
                     .font(DesignSystem.appFont(.caption, weight: .black))
@@ -213,6 +210,9 @@ private struct OnboardingFeatureCard: View {
                     .lineSpacing(3)
                     .fixedSize(horizontal: false, vertical: true)
             }
+
+            preview
+                .frame(maxWidth: .infinity)
         }
         .padding(18)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
