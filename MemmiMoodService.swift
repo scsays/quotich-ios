@@ -52,7 +52,9 @@ final class MemmiMoodService: ObservableObject {
             // still reflects what Memmi has been fed, even without backend mood generation.
             mood = localMood
             cache(localMood)
-            print("Mood generation fell back locally: \(error)")
+            #if DEBUG
+            print("Mood generation fell back locally")
+            #endif
         }
     }
 

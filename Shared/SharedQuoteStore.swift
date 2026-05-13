@@ -29,7 +29,9 @@ struct SharedQuoteStore {
 
     static func saveLatestQuote(_ quote: SharedQuote) {
         guard let defaults = defaults else {
+            #if DEBUG
             print("SharedQuoteStore: could not get UserDefaults for app group")
+            #endif
             return
         }
 
@@ -37,7 +39,9 @@ struct SharedQuoteStore {
             let data = try JSONEncoder().encode(quote)
             defaults.set(data, forKey: latestQuoteKey)
         } catch {
-            print("SharedQuoteStore: failed to encode latest quote: \(error)")
+            #if DEBUG
+            print("SharedQuoteStore: failed to encode latest quote")
+            #endif
         }
     }
 
@@ -50,7 +54,9 @@ struct SharedQuoteStore {
         do {
             return try JSONDecoder().decode(SharedQuote.self, from: data)
         } catch {
-            print("SharedQuoteStore: failed to decode latest quote: \(error)")
+            #if DEBUG
+            print("SharedQuoteStore: failed to decode latest quote")
+            #endif
             return nil
         }
     }
@@ -86,7 +92,9 @@ struct SharedQuoteStore {
     /// Loads ALL quotes from the shared quotes.json (the app writes an envelope).
     static func loadAllQuotes() -> [SharedQuote] {
         guard let url = quotesFileURL() else {
+            #if DEBUG
             print("SharedQuoteStore: could not resolve app group container URL")
+            #endif
             return []
         }
 
@@ -116,7 +124,9 @@ struct SharedQuoteStore {
             return shared
         }
 
+        #if DEBUG
         print("SharedQuoteStore: could not decode quotes.json as envelope or array")
+        #endif
         return []
     }
 

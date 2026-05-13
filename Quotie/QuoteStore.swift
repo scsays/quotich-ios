@@ -203,7 +203,9 @@ final class QuoteStore: ObservableObject {
         do {
             return try JSONDecoder().decode([DevourEvent].self, from: data)
         } catch {
-            print("Failed to decode devour log: \(error)")
+            #if DEBUG
+            print("Failed to decode devour log")
+            #endif
             return []
         }
     }
@@ -214,7 +216,9 @@ final class QuoteStore: ObservableObject {
             let data = try JSONEncoder().encode(devourLog)
             defaults.set(data, forKey: devourLogKey)
         } catch {
-            print("Failed to encode devour log: \(error)")
+            #if DEBUG
+            print("Failed to encode devour log")
+            #endif
         }
     }
 
@@ -262,13 +266,18 @@ final class QuoteStore: ObservableObject {
             )
 
             let data = try JSONEncoder().encode(envelope)
-            try data.write(to: url, options: .atomic)
+            try data.write(
+                to: url,
+                options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication]
+            )
 
             #if canImport(WidgetKit)
             WidgetCenter.shared.reloadAllTimelines()
             #endif
         } catch {
-            print("Failed to save quotes for widget: \(error)")
+            #if DEBUG
+            print("Failed to save quotes for widget")
+            #endif
         }
     }
 }

@@ -8,6 +8,11 @@ const client = new OpenAI({
 
 export async function POST(req: Request) {
   try {
+    const contentLength = Number(req.headers.get("content-length") || "0");
+    if (contentLength > 20_000) {
+      return Response.json({ mood: "Quietly Reflective" }, { status: 413 });
+    }
+
     const { quotes } = await req.json();
 
     if (!Array.isArray(quotes) || quotes.length === 0) {

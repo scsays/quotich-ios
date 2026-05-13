@@ -276,7 +276,9 @@ final class SpeechRecognizer: NSObject, ObservableObject {
 
     func startTranscribing() {
         guard let recognizer, recognizer.isAvailable else {
+            #if DEBUG
             print("Speech recognizer not available")
+            #endif
             return
         }
 
@@ -285,7 +287,9 @@ final class SpeechRecognizer: NSObject, ObservableObject {
             try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
             try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
         } catch {
-            print("Failed to configure audio session:", error)
+            #if DEBUG
+            print("Failed to configure audio session")
+            #endif
             return
         }
 
@@ -305,7 +309,9 @@ final class SpeechRecognizer: NSObject, ObservableObject {
         do {
             try audioEngine.start()
         } catch {
-            print("AudioEngine couldn't start:", error)
+            #if DEBUG
+            print("AudioEngine couldn't start")
+            #endif
             return
         }
 
@@ -318,8 +324,10 @@ final class SpeechRecognizer: NSObject, ObservableObject {
                 }
             }
 
-            if let error {
-                print("Recognition error:", error)
+            if error != nil {
+                #if DEBUG
+                print("Recognition error")
+                #endif
                 self.stopTranscribing()
             } else if result?.isFinal == true {
                 self.stopTranscribing()

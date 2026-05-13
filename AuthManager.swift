@@ -26,7 +26,9 @@ final class AuthManager: ObservableObject {
             isSignedIn = true
         } catch {
             isSignedIn = false
-            print("Anonymous sign-in failed:", error)
+            #if DEBUG
+            print("Anonymous sign-in failed")
+            #endif
         }
 
         isReady = true

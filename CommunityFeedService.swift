@@ -5,6 +5,12 @@ final class CommunityFeedService {
     static let shared = CommunityFeedService()
     private init() {}
 
+    private enum Limits {
+        static let quoteTextMax = 500
+        static let authorMax = 80
+        static let sourceMax = 120
+    }
+
     enum Sort: String {
         case new
         case old
@@ -53,6 +59,18 @@ final class CommunityFeedService {
 
         guard !trimmedText.isEmpty else {
             throw CommunityFeedError.invalidInput("Quote text can’t be empty.")
+        }
+
+        guard trimmedText.count <= Limits.quoteTextMax else {
+            throw CommunityFeedError.invalidInput("Community quotes need to stay under \(Limits.quoteTextMax) characters.")
+        }
+
+        guard trimmedAuthor.count <= Limits.authorMax else {
+            throw CommunityFeedError.invalidInput("Author names need to stay under \(Limits.authorMax) characters.")
+        }
+
+        guard trimmedSource.count <= Limits.sourceMax else {
+            throw CommunityFeedError.invalidInput("Sources need to stay under \(Limits.sourceMax) characters.")
         }
 
         let payload: [String: AnyJSON] = [
