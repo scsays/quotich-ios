@@ -60,13 +60,8 @@ struct OnboardingFlowView: View {
                     .shadow(color: .black.opacity(0.14), radius: 7, y: 4)
             }
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Meet Memmi")
-                    .font(DesignSystem.appFont(.title3, weight: .black))
-                Text("Your living quote collection")
-                    .font(DesignSystem.appFont(.caption, weight: .semibold))
-                    .foregroundStyle(DesignSystem.secondaryText(scheme))
-            }
+            Text("Meet Memmi")
+                .font(DesignSystem.appFont(.title2, weight: .black))
 
             Spacer()
 
@@ -139,17 +134,17 @@ private enum OnboardingStep: Int, CaseIterable, Identifiable {
 
     var id: Int { rawValue }
 
-    var eyebrow: String {
+    var title: String {
         switch self {
         case .feedMemmi: return "Hunger Meter"
         case .saveFavorites: return "Your Feed"
         case .snackBar: return "Snack Bar"
         case .community: return "Community Feed"
-        case .comfortReminders: return "Make it yours"
+        case .comfortReminders: return "Make It Yours"
         }
     }
 
-    var title: String {
+    var headline: String {
         switch self {
         case .feedMemmi: return "Feed Memmi your favorite quotes and Memmi will remember them for you"
         case .saveFavorites: return "Save, favorite, edit, and revisit your quotes"
@@ -190,22 +185,23 @@ private struct OnboardingFeatureCard: View {
     let step: OnboardingStep
 
     var body: some View {
-        VStack(spacing: 18) {
-            VStack(spacing: 8) {
-                Text(step.eyebrow.uppercased())
-                    .font(DesignSystem.appFont(.caption, weight: .black))
-                    .kerning(1.3)
-                    .foregroundStyle(DesignSystem.monsterPurple)
-
+        VStack(spacing: 14) {
+            VStack(spacing: 7) {
                 Text(step.title)
-                    .font(DesignSystem.appFont(.title2, weight: .black))
+                    .font(DesignSystem.appFont(.title, weight: .black))
+                    .foregroundStyle(DesignSystem.monsterPurple)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Text(step.headline)
+                    .font(DesignSystem.appFont(.headline, weight: .black))
                     .foregroundStyle(DesignSystem.primaryText(scheme))
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
 
                 Text(step.subtitle)
                     .font(DesignSystem.appFont(.callout, weight: .semibold))
-                    .foregroundStyle(DesignSystem.secondaryText(scheme))
+                    .foregroundStyle(DesignSystem.primaryText(scheme))
                     .multilineTextAlignment(.center)
                     .lineSpacing(3)
                     .fixedSize(horizontal: false, vertical: true)
@@ -213,9 +209,10 @@ private struct OnboardingFeatureCard: View {
 
             preview
                 .frame(maxWidth: .infinity)
+                .padding(.top, 8)
         }
         .padding(18)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(
             RoundedRectangle(cornerRadius: 34, style: .continuous)
                 .fill(.ultraThinMaterial)
@@ -275,8 +272,8 @@ private struct FeedAndFavoritePreview: View {
     var body: some View {
         VStack(spacing: 12) {
             HStack(spacing: 10) {
-                MiniQuoteCard(text: "Stay soft. Stay awake.", source: "Grid View", isFavorite: true, colorStyle: .lilac)
-                MiniQuoteCard(text: "Small rituals become a life.", source: "Newest first", isFavorite: false, colorStyle: .mint)
+                MiniQuoteCard(text: "Stay soft. Stay awake.", author: "Alex Elle", source: "Words from a Wanderer", isFavorite: true, colorStyle: .lilac)
+                MiniQuoteCard(text: "Small rituals become a life.", author: "Octavia Butler", source: "Parable of the Sower", isFavorite: false, colorStyle: .mint)
             }
 
             HStack(spacing: 9) {
@@ -306,7 +303,7 @@ private struct CommunityPreview: View {
         VStack(spacing: 12) {
             PreviewHeader(title: "Community Feed", systemImage: "person.3.fill")
 
-            MiniQuoteCard(text: "What is broken is also where the light gets in.", source: "Community quote", isFavorite: true, colorStyle: .peach)
+            MiniQuoteCard(text: "What is broken is also where the light gets in.", author: "Community", source: "Shared quote", isFavorite: true, colorStyle: .peach)
                 .frame(maxWidth: 260)
 
             FeaturePill(systemImage: "plus", text: "Add to My Quotes")
@@ -377,21 +374,35 @@ private struct HungerMeterBar: View {
 private struct MiniQuoteCard: View {
     @Environment(\.colorScheme) private var scheme
     let text: String
+    let author: String
     let source: String
     let isFavorite: Bool
     let colorStyle: PastelStyle
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
             Text("“\(text)”")
                 .font(DesignSystem.quoteFont(.rounded, textStyle: .callout, weight: .semibold))
                 .foregroundStyle(DesignSystem.primaryText(scheme))
                 .fixedSize(horizontal: false, vertical: true)
 
-            HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("— \(author)")
+                    .font(DesignSystem.appFont(.caption, weight: .black))
+                    .foregroundStyle(DesignSystem.primaryText(scheme))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+
                 Text(source)
                     .font(DesignSystem.appFont(.caption2, weight: .bold))
                     .foregroundStyle(DesignSystem.secondaryText(scheme))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+            }
+
+            Spacer(minLength: 0)
+
+            HStack {
                 Spacer()
                 Image(systemName: isFavorite ? "heart.fill" : "heart")
                     .font(DesignSystem.appFont(size: 14, weight: .heavy))
