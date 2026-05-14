@@ -2,7 +2,7 @@ import Foundation
 
 let sampleQuotes: [Quote] = [
     Quote(
-        text: "You don’t have to feel ready to start, you just have to start.",
+        text: "If you want to change the world around you, start by trying to understand the people in it.",
         author: "S.C. Says",
         source: "Keynote",
         isFavorite: true,

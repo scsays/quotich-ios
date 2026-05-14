@@ -97,11 +97,13 @@ struct SearchView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Back") { dismiss() }
+                        .fontWeight(.semibold)
                 }
                 ToolbarItem(placement: .principal) {
                     Text("Search").font(.headline)
                 }
             }
+            .tint(DesignSystem.monsterPurple)
             .sheet(item: $selectedQuote) { quote in
                 QuoteDetailView(quote: quote)
                     .environmentObject(store)
@@ -192,10 +194,10 @@ struct SearchView: View {
                 .font(.headline)
                 .foregroundStyle(DesignSystem.primaryText(scheme))
 
-            let recent = Array(store.quotes.suffix(10)).reversed()
+            let recent = Array(store.quotes.sorted { $0.createdAt > $1.createdAt }.prefix(10))
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                ForEach(Array(recent), id: \.id) { q in
+                ForEach(recent, id: \.id) { q in
                     MasonryQuoteCard(quote: q) {
                         store.toggleFavorite(q)
                     }
@@ -269,7 +271,7 @@ struct SearchView: View {
     }
 
     private var activeFilteredQuotes: [Quote] {
-        var base = store.quotes
+        var base = store.quotes.sorted { $0.createdAt > $1.createdAt }
 
         if let selectedCategory {
             base = base.filter { selectedCategory.matches(source: $0.source) }

@@ -50,7 +50,7 @@ struct QuotieWidgetLiveActivity: Widget {
             } minimal: {
                 Text(context.state.emoji)
             }
-            .widgetURL(URL(string: "http://www.apple.com"))
+            .widgetURL(nil)
             .keylineTint(Color.red)
         }
     }

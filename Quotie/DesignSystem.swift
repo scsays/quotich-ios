@@ -1,10 +1,86 @@
 import SwiftUI
 
+// MARK: - App Appearance
+
+enum AppAppearance: String, CaseIterable, Identifiable {
+    case system
+    case light
+    case dark
+
+    static let storageKey = "memmi.appAppearance"
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .system: return "System"
+        case .light: return "Light"
+        case .dark: return "Dark"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .system: return "Follow your iPhone setting."
+        case .light: return "Keep Memmi bright."
+        case .dark: return "Keep Memmi cozy."
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .system: return "iphone"
+        case .light: return "sun.max.fill"
+        case .dark: return "moon.fill"
+        }
+    }
+
+    var colorScheme: ColorScheme? {
+        switch self {
+        case .system: return nil
+        case .light: return .light
+        case .dark: return .dark
+        }
+    }
+}
+
 // MARK: - Design System
 // This file centralizes ALL visual language:
 // glass, glow, elevation, color, and text behavior.
 
 enum DesignSystem {
+
+    // MARK: - Typography
+
+    static func appFont(_ style: Font.TextStyle, weight: Font.Weight = .regular) -> Font {
+        .system(style, design: .rounded, weight: weight)
+    }
+
+    static func appFont(size: CGFloat, weight: Font.Weight = .regular) -> Font {
+        .system(size: size, weight: weight, design: .rounded)
+    }
+
+    static func quoteFont(_ style: FontStyle, textStyle: Font.TextStyle, weight: Font.Weight = .semibold) -> Font {
+        switch style {
+        case .rounded:
+            return .system(textStyle, design: .rounded, weight: weight)
+        case .standard:
+            return .system(textStyle, design: .monospaced, weight: weight)
+        case .serif:
+            return .system(textStyle, design: .serif, weight: weight)
+        }
+    }
+
+    static func quoteFont(_ style: FontStyle, size: CGFloat, weight: Font.Weight = .semibold) -> Font {
+        switch style {
+        case .rounded:
+            return .system(size: size, weight: weight, design: .rounded)
+        case .standard:
+            return .system(size: size, weight: weight, design: .monospaced)
+        case .serif:
+            return .system(size: size, weight: weight, design: .serif)
+        }
+    }
 
     // MARK: - Core Colors
 
@@ -166,7 +242,6 @@ extension View {
         )
     }
 }
-
 
 
 

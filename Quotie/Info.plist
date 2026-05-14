@@ -4,7 +4,12 @@
 <dict>
 	<key>INIntentsRestrictedWhileProtectedDataUnavailable</key>
 	<array/>
-	<key>information property list</key>
-	<string></string>
+	<key>MEMMI_MOOD_ENDPOINT</key>
+	<string>https://memmi-backend-cgm1eudqd-andres-projects-2ab2f211.vercel.app/</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 </dict>
 </plist>

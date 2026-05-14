@@ -9,7 +9,7 @@ struct MasonryQuoteCard: View {
         VStack(alignment: .leading, spacing: 10) {
 
             Text("“\(quote.text)”")
-                .font(font(for: quote.fontStyle))
+                .font(DesignSystem.quoteFont(quote.fontStyle, textStyle: .subheadline))
                 .foregroundStyle(DesignSystem.primaryText(scheme))
                 .fixedSize(horizontal: false, vertical: true)
 
@@ -30,11 +30,15 @@ struct MasonryQuoteCard: View {
 
             HStack {
                 Spacer()
-                Button(action: onToggleFavorite) {
-                    Image(systemName: quote.isFavorite ? "heart.fill" : "heart")
-                        .font(.system(size: 14, weight: .semibold))
-                }
-                .foregroundStyle(quote.isFavorite ? DesignSystem.monsterPurple : .secondary)
+
+                Image(systemName: quote.isFavorite ? "heart.fill" : "heart")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(quote.isFavorite ? DesignSystem.monsterPurple : .secondary)
+                    .contentShape(Rectangle()) // easier to tap
+                    .onTapGesture {
+                        onToggleFavorite()
+                    }
+                    .accessibilityLabel(quote.isFavorite ? "Unfavorite" : "Favorite")
             }
         }
         .padding(14)
@@ -45,12 +49,4 @@ struct MasonryQuoteCard: View {
         )
     }
 
-    private func font(for style: FontStyle) -> Font {
-        switch style {
-        case .standard: return .system(.subheadline, design: .default)
-        case .serif:    return .system(.subheadline, design: .serif)
-        case .rounded:  return .system(.subheadline, design: .rounded)
-        }
-    }
 }
-

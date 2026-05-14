@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C113190A2F0EB37400085139 /* MemmiDevourLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11319092F0EB36400085139 /* MemmiDevourLog.swift */; };
+		C113190C2F0EB48200085139 /* MemmiMoodService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C113190B2F0EB47D00085139 /* MemmiMoodService.swift */; };
+		C113190D2F106EBE00085139 /* MemmiMoodService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C113190B2F0EB47D00085139 /* MemmiMoodService.swift */; };
 		C12C38662EF626E100301E39 /* SharedConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12C384C2EF626E100301E39 /* SharedConfig.swift */; };
 		C12C38672EF626E100301E39 /* SharedQuoteStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12C384D2EF626E100301E39 /* SharedQuoteStore.swift */; };
 		C12C386A2EF626E100301E39 /* SharedQuoteStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12C384D2EF626E100301E39 /* SharedQuoteStore.swift */; };
@@ -16,12 +19,23 @@
 		C12C38AD2F01F32D00301E39 /* MemmiService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12C38AC2F01F32900301E39 /* MemmiService.swift */; };
 		C12C38AF2F01F3D500301E39 /* MemmiBubble.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12C38AE2F01F3D100301E39 /* MemmiBubble.swift */; };
 		C12C38B12F0200DD00301E39 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12C38B02F0200D600301E39 /* AppConfig.swift */; };
+		C153B1E42F1B1B5300C9BF99 /* QuoteReorderDropDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C153B1E32F1B1B4200C9BF99 /* QuoteReorderDropDelegate.swift */; };
+		C153B2262F27E37B00C9BF99 /* CommunityFeedModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C153B2252F27E37700C9BF99 /* CommunityFeedModels.swift */; };
+		C153B2282F27E39400C9BF99 /* CommunityFeedService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C153B2272F27E38D00C9BF99 /* CommunityFeedService.swift */; };
+		C153B22A2F27E4F000C9BF99 /* SupabaseClientProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = C153B2292F27E4E900C9BF99 /* SupabaseClientProvider.swift */; };
+		C153B22D2F298B8900C9BF99 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = C153B22C2F298B8900C9BF99 /* Supabase */; };
 		C1628C442EE6857D003A8FA2 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C16334762ECEAC1300F79895 /* WidgetKit.framework */; };
 		C1628C452EE6857D003A8FA2 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C16334782ECEAC1300F79895 /* SwiftUI.framework */; };
 		C1628C522EE6857E003A8FA2 /* QuoteOfTheDayWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C1628C432EE6857D003A8FA2 /* QuoteOfTheDayWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		C163345D2ECB91D600F79895 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C16334552ECB91D600F79895 /* Assets.xcassets */; };
 		C17727052F037C20008F84E8 /* SnackBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17727042F037C13008F84E8 /* SnackBarView.swift */; };
 		C17727072F037C9A008F84E8 /* SnackQuoteLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17727062F037C96008F84E8 /* SnackQuoteLibrary.swift */; };
+		C18B2A312F08995F00B395FE /* MemmiNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18B2A302F08995800B395FE /* MemmiNotifications.swift */; };
+		C18B2A332F09C77D00B395FE /* OnboardingFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C18B2A322F09C77700B395FE /* OnboardingFlowView.swift */; };
+		C1C01B5F2F2EF79E006595C5 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1C01B5E2F2EF79A006595C5 /* AuthManager.swift */; };
+		C1C01B612F3179BA006595C5 /* CommunityNotifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1C01B602F3179B3006595C5 /* CommunityNotifications.swift */; };
+		C1C01B632F31A7EC006595C5 /* AllCommunityQuotesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1C01B622F31A7E4006595C5 /* AllCommunityQuotesView.swift */; };
+		C1E513902F2C5096008FA62F /* CommunityFeedRPCModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E5138F2F2C4D35008FA62F /* CommunityFeedRPCModels.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,12 +63,18 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		C11319092F0EB36400085139 /* MemmiDevourLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemmiDevourLog.swift; sourceTree = "<group>"; };
+		C113190B2F0EB47D00085139 /* MemmiMoodService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemmiMoodService.swift; sourceTree = "<group>"; };
 		C12C384C2EF626E100301E39 /* SharedConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedConfig.swift; sourceTree = "<group>"; };
 		C12C384D2EF626E100301E39 /* SharedQuoteStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedQuoteStore.swift; sourceTree = "<group>"; };
 		C12C386D2EF626E100301E39 /* QuoteModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteModel.swift; sourceTree = "<group>"; };
 		C12C38AC2F01F32900301E39 /* MemmiService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemmiService.swift; sourceTree = "<group>"; };
 		C12C38AE2F01F3D100301E39 /* MemmiBubble.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemmiBubble.swift; sourceTree = "<group>"; };
 		C12C38B02F0200D600301E39 /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
+		C153B1E32F1B1B4200C9BF99 /* QuoteReorderDropDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuoteReorderDropDelegate.swift; sourceTree = "<group>"; };
+		C153B2252F27E37700C9BF99 /* CommunityFeedModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityFeedModels.swift; sourceTree = "<group>"; };
+		C153B2272F27E38D00C9BF99 /* CommunityFeedService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityFeedService.swift; sourceTree = "<group>"; };
+		C153B2292F27E4E900C9BF99 /* SupabaseClientProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseClientProvider.swift; sourceTree = "<group>"; };
 		C1628C432EE6857D003A8FA2 /* QuoteOfTheDayWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = QuoteOfTheDayWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1628C5C2EE6870B003A8FA2 /* QuoteOfTheDayWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = QuoteOfTheDayWidgetExtension.entitlements; sourceTree = "<group>"; };
 		C16334552ECB91D600F79895 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -65,6 +85,12 @@
 		C17727062F037C96008F84E8 /* SnackQuoteLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnackQuoteLibrary.swift; sourceTree = "<group>"; };
 		C17D669C2EE65CA900DF68AC /* QuotieWidget2Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = QuotieWidget2Extension.entitlements; sourceTree = "<group>"; };
 		C1892A322EC6A29100E4C95B /* Quotie.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Quotie.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C18B2A302F08995800B395FE /* MemmiNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemmiNotifications.swift; sourceTree = "<group>"; };
+		C18B2A322F09C77700B395FE /* OnboardingFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlowView.swift; sourceTree = "<group>"; };
+		C1C01B5E2F2EF79A006595C5 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
+		C1C01B602F3179B3006595C5 /* CommunityNotifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityNotifications.swift; sourceTree = "<group>"; };
+		C1C01B622F31A7E4006595C5 /* AllCommunityQuotesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllCommunityQuotesView.swift; sourceTree = "<group>"; };
+		C1E5138F2F2C4D35008FA62F /* CommunityFeedRPCModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityFeedRPCModels.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -122,6 +148,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C153B22D2F298B8900C9BF99 /* Supabase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -150,6 +177,18 @@
 		C1892A292EC6A29100E4C95B = {
 			isa = PBXGroup;
 			children = (
+				C1C01B622F31A7E4006595C5 /* AllCommunityQuotesView.swift */,
+				C1C01B602F3179B3006595C5 /* CommunityNotifications.swift */,
+				C1C01B5E2F2EF79A006595C5 /* AuthManager.swift */,
+				C1E5138F2F2C4D35008FA62F /* CommunityFeedRPCModels.swift */,
+				C153B2292F27E4E900C9BF99 /* SupabaseClientProvider.swift */,
+				C153B2272F27E38D00C9BF99 /* CommunityFeedService.swift */,
+				C153B2252F27E37700C9BF99 /* CommunityFeedModels.swift */,
+				C153B1E32F1B1B4200C9BF99 /* QuoteReorderDropDelegate.swift */,
+				C113190B2F0EB47D00085139 /* MemmiMoodService.swift */,
+				C11319092F0EB36400085139 /* MemmiDevourLog.swift */,
+				C18B2A322F09C77700B395FE /* OnboardingFlowView.swift */,
+				C18B2A302F08995800B395FE /* MemmiNotifications.swift */,
 				C17727062F037C96008F84E8 /* SnackQuoteLibrary.swift */,
 				C17727042F037C13008F84E8 /* SnackBarView.swift */,
 				C12C38B02F0200D600301E39 /* AppConfig.swift */,
@@ -221,6 +260,7 @@
 			);
 			name = Quotie;
 			packageProductDependencies = (
+				C153B22C2F298B8900C9BF99 /* Supabase */,
 			);
 			productName = Quotie;
 			productReference = C1892A322EC6A29100E4C95B /* Quotie.app */;
@@ -253,6 +293,9 @@
 			);
 			mainGroup = C1892A292EC6A29100E4C95B;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				C153B22B2F2945A300C9BF99 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C1892A332EC6A29100E4C95B /* Products */;
 			projectDirPath = "";
@@ -287,6 +330,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C113190D2F106EBE00085139 /* MemmiMoodService.swift in Sources */,
 				C12C387E2F01DA7000301E39 /* QuoteModel.swift in Sources */,
 				C12C386A2EF626E100301E39 /* SharedQuoteStore.swift in Sources */,
 				C12C387D2F01DA6800301E39 /* SharedConfig.swift in Sources */,
@@ -297,14 +341,26 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C1C01B612F3179BA006595C5 /* CommunityNotifications.swift in Sources */,
+				C18B2A332F09C77D00B395FE /* OnboardingFlowView.swift in Sources */,
+				C113190C2F0EB48200085139 /* MemmiMoodService.swift in Sources */,
+				C153B1E42F1B1B5300C9BF99 /* QuoteReorderDropDelegate.swift in Sources */,
 				C12C38AF2F01F3D500301E39 /* MemmiBubble.swift in Sources */,
 				C12C38B12F0200DD00301E39 /* AppConfig.swift in Sources */,
+				C153B2282F27E39400C9BF99 /* CommunityFeedService.swift in Sources */,
+				C153B22A2F27E4F000C9BF99 /* SupabaseClientProvider.swift in Sources */,
+				C1C01B5F2F2EF79E006595C5 /* AuthManager.swift in Sources */,
+				C1C01B632F31A7EC006595C5 /* AllCommunityQuotesView.swift in Sources */,
+				C18B2A312F08995F00B395FE /* MemmiNotifications.swift in Sources */,
 				C12C38AD2F01F32D00301E39 /* MemmiService.swift in Sources */,
 				C17727072F037C9A008F84E8 /* SnackQuoteLibrary.swift in Sources */,
 				C17727052F037C20008F84E8 /* SnackBarView.swift in Sources */,
 				C12C38662EF626E100301E39 /* SharedConfig.swift in Sources */,
 				C12C38712EF626E100301E39 /* QuoteModel.swift in Sources */,
+				C113190A2F0EB37400085139 /* MemmiDevourLog.swift in Sources */,
 				C12C38672EF626E100301E39 /* SharedQuoteStore.swift in Sources */,
+				C1E513902F2C5096008FA62F /* CommunityFeedRPCModels.swift in Sources */,
+				C153B2262F27E37B00C9BF99 /* CommunityFeedModels.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -326,7 +382,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = QuoteOfTheDayWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = LV8JT6Z4FF;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = QuoteOfTheDayWidget/Info.plist;
@@ -337,7 +393,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.QuotichApp.Quotich.QuoteOfTheDayWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -357,7 +413,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = QuoteOfTheDayWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = LV8JT6Z4FF;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = QuoteOfTheDayWidget/Info.plist;
@@ -368,7 +424,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.QuotichApp.Quotich.QuoteOfTheDayWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -511,12 +567,12 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Quotie/Quotie.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = LV8JT6Z4FF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Quotie/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Quotich;
+				INFOPLIST_KEY_CFBundleDisplayName = Memmi;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Quotie uses your microphone so you can dictate quotes";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Quotie uses speech recognition so you can speak quotes instead of typing them";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -528,12 +584,12 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.QuotichApp.Quotich;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -548,12 +604,12 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Quotie/Quotie.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = LV8JT6Z4FF;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Quotie/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Quotich;
+				INFOPLIST_KEY_CFBundleDisplayName = Memmi;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Quotie uses your microphone so you can dictate quotes";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Quotie uses speech recognition so you can speak quotes instead of typing them";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -565,12 +621,12 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.QuotichApp.Quotich;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -609,6 +665,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C153B22B2F2945A300C9BF99 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C153B22C2F298B8900C9BF99 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C153B22B2F2945A300C9BF99 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = C1892A2A2EC6A29100E4C95B /* Project object */;
 }

@@ -4,45 +4,50 @@ struct BottomTabBar: View {
     @Environment(\.colorScheme) private var scheme
 
     @Binding var selectedTab: AppTab
-    @Binding var favoritesOnly: Bool
+    @Binding var viewMode: HomeViewMode
 
+    var onSnackTapped: () -> Void
     var onSearchTapped: () -> Void
     var onAddTapped: () -> Void
     var showsAddButton: Bool = true
 
+    // MARK: - Colors
+
+    private var inactiveColor: Color { .secondary }                // ✅ matches Account gray
+    private var activeColor: Color { DesignSystem.monsterPurple }  // ✅ Memmi purple
+    private var snackSymbol: String {
+        // Prefer popcorn if available; fall back gracefully on older iOS.
+        if UIImage(systemName: "popcorn") != nil { return "popcorn" }
+        if UIImage(systemName: "popcorn.fill") != nil { return "popcorn.fill" }
+        return "takeoutbag.and.cup.and.straw"
+    }
+
     var body: some View {
         HStack(spacing: 18) {
 
-            // Search (opens SearchView as a sheet)
+            // Search (sheet)
             Button {
                 onSearchTapped()
             } label: {
-                VStack(spacing: 4) {
-                    Image(systemName: "magnifyingglass")
-                        .font(.system(size: 18, weight: .semibold))
-                    Text("Search")
-                        .font(.caption2)
-                }
-                .frame(maxWidth: .infinity)
-                .foregroundStyle(DesignSystem.monsterPurple)
+                tabLabel(system: "magnifyingglass", title: "Search")
+                    .foregroundStyle(inactiveColor) // ✅ now gray
             }
 
-            // Favorites (toggles filter on Home)
-            Button {
-                favoritesOnly.toggle()
-                selectedTab = .home
+            // View menu (Grid / Favorites / Card)
+            Menu {
+                ForEach(HomeViewMode.allCases) { mode in
+                    Button {
+                        viewMode = mode
+                        selectedTab = .home
+                    } label: {
+                        Label(mode.title, systemImage: mode.systemImage)
+                    }
+                }
             } label: {
-                VStack(spacing: 4) {
-                    Image(systemName: favoritesOnly ? "heart.fill" : "heart")
-                        .font(.system(size: 18, weight: .semibold))
-                    Text("Favorites")
-                        .font(.caption2)
-                }
-                .frame(maxWidth: .infinity)
-                .foregroundStyle(favoritesOnly ? DesignSystem.monsterPurple : .secondary)
+                tabLabel(system: viewMode.systemImage, title: "View")
+                    .foregroundStyle(viewMode == .grid ? inactiveColor : activeColor)
             }
 
-            
             // Add Quote (big +)
             if showsAddButton {
                 Button(action: onAddTapped) {
@@ -56,14 +61,18 @@ struct BottomTabBar: View {
                         )
                         .foregroundStyle(.white)
                 }
+                .buttonStyle(.plain)
             } else {
-                // keep spacing so layout stays even
                 Spacer()
                     .frame(width: 54, height: 54)
             }
-
-            // Snack Bar (tab destination)
-            tabButton(tab: .snack, system: "tray", title: "Snack Bar")
+            // Snack Bar (sheet/modal)
+            Button {
+                onSnackTapped()
+            } label: {
+                tabLabel(system: snackSymbol, title: "Snack Bar")
+                    .foregroundStyle(inactiveColor) // ✅ keep gray
+            }
 
             // Account (tab destination)
             tabButton(tab: .account, system: "person.crop.circle", title: "Account")
@@ -81,19 +90,26 @@ struct BottomTabBar: View {
         )
     }
 
+    // MARK: - Shared label
+
+    private func tabLabel(system: String, title: String) -> some View {
+        VStack(spacing: 4) {
+            Image(systemName: system)
+                .font(.system(size: 18, weight: .semibold))
+            Text(title)
+                .font(DesignSystem.appFont(.caption2, weight: .semibold))
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    // MARK: - Account tab button
+
     private func tabButton(tab: AppTab, system: String, title: String) -> some View {
         Button {
             selectedTab = tab
         } label: {
-            VStack(spacing: 4) {
-                // IMPORTANT: uses the passed-in `system` value
-                Image(systemName: system)
-                    .font(.system(size: 18, weight: .semibold))
-                Text(title)
-                    .font(.caption2)
-            }
-            .frame(maxWidth: .infinity)
-            .foregroundStyle(selectedTab == tab ? DesignSystem.monsterPurple : .secondary)
+            tabLabel(system: system, title: title)
+                .foregroundStyle(selectedTab == tab ? activeColor : inactiveColor)
         }
     }
 }

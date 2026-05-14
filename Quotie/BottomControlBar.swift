@@ -5,25 +5,37 @@ struct BottomControlBar: View {
 
     @Binding var searchText: String
     @Binding var showFavoritesOnly: Bool
+
     var onSearchTapped: () -> Void
     var onAddQuote: () -> Void
+    var onSnackBar: () -> Void
 
     @FocusState private var searchFocused: Bool
 
     var body: some View {
         HStack(spacing: 14) {
 
-            // MARK: - Favorites Toggle
+            // Favorites toggle
             floatingPill {
                 showFavoritesOnly.toggle()
             } label: {
                 Image(systemName: showFavoritesOnly ? "star.fill" : "line.3.horizontal")
             }
 
-            // MARK: - Search Field (Liquid Glass)
+            // Search field
             searchField
+                .onTapGesture {
+                    onSearchTapped()
+                }
 
-            // MARK: - Add Quote
+            // Snack Bar button
+            floatingPill {
+                onSnackBar()
+            } label: {
+                Image(systemName: "sparkles")
+            }
+
+            // Add quote
             floatingPill {
                 onAddQuote()
             } label: {
@@ -35,7 +47,6 @@ struct BottomControlBar: View {
         .padding(.vertical, 8)
     }
 
-    // MARK: - Search Field Wrapper
     private var searchField: some View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
@@ -50,12 +61,8 @@ struct BottomControlBar: View {
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
         .liquidGlass(cornerRadius: 16, scheme: colorScheme)
-        .onTapGesture {
-            searchFocused = true
-        }
     }
 
-    // MARK: - Floating Pill Button
     private func floatingPill(
         action: @escaping () -> Void,
         label: @escaping () -> some View
@@ -68,18 +75,4 @@ struct BottomControlBar: View {
         }
     }
 }
-extension View {
-    func circularGlassButton(size: CGFloat = 44) -> some View {
-        self
-            .frame(width: size, height: size)
-            .background(
-                Circle().fill(.ultraThinMaterial)
-            )
-            .overlay(
-                Circle().stroke(Color.white.opacity(0.25), lineWidth: 0.8)
-            )
-            .shadow(color: .black.opacity(0.25), radius: 8, y: 4)
-    }
-}
-
 

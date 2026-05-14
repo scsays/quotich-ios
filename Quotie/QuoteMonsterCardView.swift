@@ -39,8 +39,11 @@ struct QuoteMonsterCardView: View {
                 .padding(.horizontal, 22)
                 .padding(.top, 18)
 
-                QuoteMonsterView(mood: .happy)
-                    .scaleEffect(1.3)
+                QuoteMonsterView(
+                    mood: MonsterMood.from(hungerLevel: store.hungerLevel),
+                    size: 150,
+                    badgeFontStyle: store.majorityFontStyle()
+                )
                     .padding(.top, 4)
 
                 // Hunger meter card
@@ -49,7 +52,7 @@ struct QuoteMonsterCardView: View {
                         .font(.caption)
                         .foregroundStyle(.white.opacity(0.9))
 
-                    ProgressView(value: min(Double(store.hungerLevel) / 5.0, 1.0))
+                    ProgressView(value: MonsterMood.visualProgress(fromHungerLevel: store.hungerLevel))
                         .tint(.white)
                 }
                 .padding(16)
@@ -65,7 +68,7 @@ struct QuoteMonsterCardView: View {
 
                 // Quote card
                 VStack(spacing: 10) {
-                    Text("Quotie’s Favorite Quote")
+                    Text("Memmi’s Favorite Quote")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(.white.opacity(0.9))
 

@@ -1,20 +1,56 @@
 import SwiftUI
 
 enum AppTab: String {
-    case home, snack, account
+    case home, account
+    // Snack Bar is presented modally (fullScreenCover)
+}
+
+enum HomeViewMode: String, CaseIterable, Identifiable {
+    case grid
+    case favorites
+    case card
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .grid: return "Grid View"
+        case .favorites: return "Favorites View"
+        case .card: return "Card View"
+        }
+    }
+
+    var shortTitle: String {
+        switch self {
+        case .grid: return "Grid"
+        case .favorites: return "Favorites"
+        case .card: return "Card"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .grid: return "square.grid.2x2"
+        case .favorites: return "heart.fill"
+        case .card: return "rectangle.portrait.on.rectangle.portrait"
+        }
+    }
 }
 
 struct RootTabView: View {
     @StateObject private var store = QuoteStore()
+    @ObservedObject private var notifications = MemmiNotifications.shared
 
     @State private var selectedTab: AppTab = .home
     @State private var showingAddQuote = false
     @State private var showingSearch = false
-    
-    @State private var isScrolling: Bool = false
+    @State private var showingSnackBar = false
 
-    // Favorites filter toggle (lives at root so bar + feed share it)
-    @State private var favoritesOnly: Bool = false
+    @State private var isScrolling: Bool = false
+    @State private var homeViewMode: HomeViewMode = .grid
+
+    // Deep-link: set when user taps a resurface notification
+    @State private var resurfacedQuote: Quote?
 
     var body: some View {
         ZStack {
@@ -22,55 +58,75 @@ struct RootTabView: View {
                 switch selectedTab {
                 case .home:
                     HomeFeedView(
-                        favoritesOnly: favoritesOnly,
+                        viewMode: homeViewMode,
+                        isSearchActive: showingSearch,
                         isScrolling: $isScrolling
                     )
                     .environmentObject(store)
 
-                case .snack:
-                    SnackBarView()
-                        .environmentObject(store)
-
                 case .account:
-                    AccountView()
-                        .environmentObject(store)
+                    SettingsView(store: store, onBack: {
+                        withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
+                            selectedTab = .home
+                        }
+                    })
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        // Bottom bar ONLY on Home and ONLY when SnackBar is not showing
         .safeAreaInset(edge: .bottom) {
-            ZStack {
-                // Fading bar WITHOUT the plus button
-                BottomTabBar(
-                    selectedTab: $selectedTab,
-                    favoritesOnly: $favoritesOnly,
-                    onSearchTapped: { showingSearch = true },
-                    onAddTapped: { showingAddQuote = true },
-                    showsAddButton: false
-                )
-                .opacity(isScrolling ? 0 : 1)
-                .offset(y: isScrolling ? 20 : 0)
-                .animation(Animation.easeOut(duration: 0.25), value: isScrolling)
+            if selectedTab == .home && !showingSnackBar {
+                ZStack {
+                    BottomTabBar(
+                        selectedTab: $selectedTab,
+                        viewMode: $homeViewMode,
+                        onSnackTapped: { showingSnackBar = true },
+                        onSearchTapped: { showingSearch = true },
+                        onAddTapped: { showingAddQuote = true },
+                        showsAddButton: false
+                    )
+                    .opacity(isScrolling ? 0 : 1)
+                    .offset(y: isScrolling ? 20 : 0)
+                    .animation(.easeOut(duration: 0.25), value: isScrolling)
 
-                // Persistent PLUS button (never fades)
-                Button(action: { showingAddQuote = true }) {
-                    Image(systemName: "plus")
-                        .font(.system(size: 20, weight: .heavy))
-                        .frame(width: 62, height: 62)
-                        .background(
-                            Circle()
-                                .fill(DesignSystem.monsterPurple)
-                                .shadow(color: Color.black.opacity(0.22), radius: 14, y: 8)
-                        )
-                        .foregroundStyle(.white)
+                    // Persistent PLUS button (never fades)
+                    Button(action: { showingAddQuote = true }) {
+                        Image(systemName: "plus")
+                            .font(.system(size: 20, weight: .heavy))
+                            .frame(width: 62, height: 62)
+                            .background(
+                                Circle()
+                                    .fill(DesignSystem.monsterPurple)
+                                    .shadow(color: Color.black.opacity(0.22), radius: 14, y: 8)
+                            )
+                            .foregroundStyle(.white)
+                    }
+                    .offset(y: -14)
                 }
-                .offset(y: -14)  // float it a bit
+                .padding(.horizontal, 16)
             }
-            .padding(.horizontal, 16)
         }
         .onAppear {
             store.applyDailyHungerDecay()
             store.updateWidgetQuoteOfTheDay()
+
+            if MemmiNotifications.notificationsEnabled {
+                // Request notification permission and schedule both channels
+                MemmiNotifications.shared.requestAuthorizationIfNeeded { granted in
+                    guard granted else { return }
+                    MemmiNotifications.shared.refreshHungryNudge(hungerLevel: store.hungerLevel)
+                    store.scheduleResurfaceNotificationIfNeeded()
+                }
+            } else {
+                MemmiNotifications.shared.cancelAllManagedNotifications()
+            }
+        }
+        // Observe deep-link: when user taps a resurface notification, show the quote
+        .onChange(of: notifications.pendingResurfaceQuoteID) { quoteID in
+            guard let id = quoteID else { return }
+            resurfacedQuote = store.quotes.first(where: { $0.id == id })
+            notifications.pendingResurfaceQuoteID = nil
         }
         .sheet(isPresented: $showingAddQuote) {
             AddQuoteView(store: store)
@@ -79,5 +135,17 @@ struct RootTabView: View {
             SearchView()
                 .environmentObject(store)
         }
+        .fullScreenCover(isPresented: $showingSnackBar) {
+            SnackBarView(onBack: { showingSnackBar = false })
+                .environmentObject(store)
+        }
+        // Resurface sheet — opens automatically when notification is tapped
+        .sheet(item: $resurfacedQuote) { quote in
+            NavigationStack {
+                QuoteDetailView(quote: quote)
+                    .environmentObject(store)
+            }
+        }
+        .font(DesignSystem.appFont(.body))
     }
 }
